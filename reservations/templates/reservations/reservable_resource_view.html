@@ -1,0 +1,36 @@
+{% extends "reservations/base.html" %}
+
+{% load tz %}
+
+{% block header %}
+    <div class="row">
+      <div class="large-12 columns">
+        <h1>Lastnosti</h1>
+      </div>
+    </div>
+{% endblock %}
+
+
+{% block body %}
+
+<div class="row">
+    <div class="small-10 columns">
+	<table>
+      <tr><td></td>
+	{% for res in data.resources %}
+		<td><a href="{% url "resource-detail" res.id %}">{{res.name}}</td>
+    {% endfor %}
+      </tr>
+    {% for reservable, l in data.reservable_table %}
+        <tr><td><a href="{% url "reservable-detail" reservable.id %}">{{reservable.name}}</a></td>
+        {% for n in l %}
+        <td>{{n}}</td>
+        {% endfor %}
+        </tr>
+	{% endfor %}
+	</table>
+    </div>
+</div>
+	
+	
+{% endblock %}

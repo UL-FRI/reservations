@@ -1,0 +1,163 @@
+{% load i18n %}
+{% load rest_framework %}
+
+
+<p><a class="close-reveal-modal">&#215;</a></p>
+
+<div class='row'>
+	<div class="small-12 columns">	    
+	    {% block description %}
+    	    {{ description }}
+        {% endblock %}
+{% if display_edit_forms %}
+    {% if post_form %}
+        {% with form=post_form %}
+        <form id='post_form' action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" data-abide>
+            <fieldset>
+                {{ post_form }}                         
+                <div class="form-actions">
+                    <button title="{% blocktrans %}Make a POST request on the {{ name }} resource{% endblocktrans %}">{% trans 'POST' %}</button>
+                </div>
+            </fieldset>
+        </form>
+        {% endwith %}
+    {% endif %}
+                
+    {% if put_form %}
+        <div id="object-form">
+            <form id='put_form' action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" data-abide>
+                <fieldset>
+                    {{ put_form }}
+                    <div class='row'>
+                        <div class='small-6 columns'>
+		                    <div class="form-actions">
+    		                    <button name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="PUT" title="{% blocktrans %}Make a PUT request on the {{ name }} resource{% endblocktrans %}">{% trans 'Update' %}</button>
+                            </div>
+                        </div>
+        	        </div>   
+                </fieldset>
+            </form>
+        </div>                   
+    {% endif %}
+    {% if not put_form and not post_form %}
+        <form id="object-form">
+	        <div class='row'>
+                <div class='small-12 columns'>                
+		        	<label>{% trans 'reason' %}
+        				<input type="text" placeholder="large-12.columns" value="{{ view.object.reason }}" readonly />
+      				</label>
+    			</div>        			
+        	</div>
+	        <div class='row'>
+                <div class='small-12 columns'>                
+		        	<label>{% trans 'start' %}
+        				<input type="text" placeholder="large-12.columns" value="{{ view.object.start }}" readonly />
+      				</label>
+    			</div>        			
+        	</div>
+	        <div class='row'>
+                <div class='small-12 columns'>                
+		        	<label>{% trans 'end' %}
+        				<input type="text" placeholder="large-12.columns" value="{{ view.object.end }}" readonly />
+      				</label>
+    			</div>        			
+        	</div>
+	        <div class='row'>
+                <div class='small-12 columns'>                
+		        	<label>{% trans 'owners' %}		        	
+		        	<input type="text" placeholder="large-12.columns" value="{% for owner in view.object.owners.all %}{{ owner.first_name }} {{ owner.last_name }}; {% endfor %}" readonly />
+      				</label>
+    			</div>        			
+        	</div>
+	        <div class='row'>
+                <div class='small-12 columns'>                
+		        	<label>{% trans 'reservables' %}		        	
+		        	<input type="text" placeholder="large-12.columns" value="{% for reservable in view.object.reservables.all %}{{ reservable.slug }};{% endfor %}" readonly />
+      				</label>
+    			</div>        			
+        	</div>
+   	    </form> 
+    {% endif %} 
+   </div>        <!-- 12 Column -->
+</div>            <!-- row -->
+
+    {% if delete_form %}
+<div class='row'>
+	<div class="small-12 columns">	    
+	    <form id='delete_form' action="{{ request.get_full_path }}" method="POST" data-abide>
+	        {% csrf_token %}
+	        <input type="hidden" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="DELETE" />
+	        <button title="{% blocktrans %}Make a DELETE request on the {{ name }} resource{% endblocktrans %}">{% trans 'DELETE' %}</button>
+	    </form>
+	</div>
+</div>	    
+    {% endif %}
+{% endif %}
+
+ <script>
+ $(document).ready(function() {
+	 
+    $("#put_form").ajaxForm(
+    {
+    	type: 'put',
+ 	    success: function() {	    	
+        	reload();
+    	 	$('#myModal').foundation('reveal', 'close');
+    	 	$('#myDetailsModal').foundation('reveal', 'close');
+
+ 	 	    return false;
+ 	 	},
+ 		error:  function(XMLHttpRequest, textStatus, errorThrown)
+ 		  {
+ 			if (textStatus == 'timeout') {
+ 				alert('Timeout');
+ 			}
+ 			else {
+				message = ''
+				for(entry in XMLHttpRequest.responseJSON) {   	 					
+	   				message += XMLHttpRequest.responseJSON[entry] + '\n'
+	   	 		}
+	   	 	  	alert(message);
+ 			}
+ 		},
+ 	 	
+ 	 	dataType: 'json',
+ 	 	timeout: 5000, // 5s
+    }    
+    );	      
+    $("#delete_form, #post_form").ajaxForm(
+   	    {
+   	 	    success: function() {	    	
+   	 	 		//window.opener.reload();
+   	 	 	    //window.close();
+   	 	 	    reload()
+        	 	$('#myModal').foundation('reveal', 'close')
+   	 	 	    return false;
+   	 	 	},
+   	 		error:  function(XMLHttpRequest, textStatus, errorThrown)
+   	 		  {
+   	 			if (textStatus == 'timeout') {
+   	 				alert('Timeout');
+   	 			}
+   	 			else {
+   					message = ''
+					for(entry in XMLHttpRequest.responseJSON) {   	 					
+		   				message += XMLHttpRequest.responseJSON[entry] + '\n'
+		   	 		}
+		   	 	  	alert(message);
+   	 			}
+   	 		},
+   	 	 	
+   	 	 	dataType: 'json',
+   	 	 	timeout: 5000, // 5s
+   	    }    
+	);     
+	var $reason = $("input[name='reason']");
+	$reason.attr('required', 'true');
+	$reason.parent().append($('<small>').addClass('error').text('Polje mora biti izpolnjeno'));	    
+ 	     	    
+ 	// date time picker
+	$("input[name='start']").fdatetimepicker();
+	$("input[name='end']").fdatetimepicker();       
+ });
+ </script>

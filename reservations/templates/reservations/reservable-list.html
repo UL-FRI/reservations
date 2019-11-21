@@ -1,0 +1,81 @@
+{% extends "reservations/base.html" %}
+
+{% load rest_framework %}
+{% load i18n %}
+
+{% block media %}
+    <script src="{{STATIC_URL}}/jquery-form/jquery.form.js"></script>
+	<script src="{{STATIC_URL}}/foundation-datetimepicker/foundation-datetimepicker.js"></script>
+
+    <script src="{{STATIC_URL}}/chosen/chosen.jquery.js"></script>    
+	<script src="{{STATIC_URL}}/js/reservable-list.js"></script>
+
+	<link href="{{STATIC_URL}}/foundation-datetimepicker/foundation-datetimepicker.css" rel="stylesheet">	
+	<link href="{{STATIC_URL}}/chosen/chosen.css" rel="stylesheet">
+    
+    
+{% endblock %}
+
+
+{% block body %}
+
+
+<form id='search_form' method="GET">
+  <div class="row data_row">  
+    <div class="small-6 columns">
+      <label>{% trans 'Resource' %}
+        <select name='resource'>
+          {% for i in data.0 %}
+			<option value="{{ i.slug }}">{{ i.name }}</option>  	
+		  {% endfor %}        
+        </select>
+      </label>
+    </div>  
+    <div class="small-5 columns">  	
+      <label>{% trans 'Value' %}
+        <input type="number" placeholder="value" name='value' required />
+      </label>
+    </div>    
+    <div class="small-1 columns cancel-icon" hidden>
+      <label>{% trans 'Remove' %}
+    	<img src='{{STATIC_URL}}/images/cancel.png' onclick="remove_row(this)" />
+      </label>
+    </div>    
+  </div>
+  <div class="row">
+    <div class="small-1 columns">  	
+      <img src='{{STATIC_URL}}/images/add.png'  onclick="add_extra_row()"/>
+    </div>
+    <div class="small-11 columns">  	
+      <input type="submit" class="button" value="{% trans 'Search' %}"/>
+    </div>
+  </div>
+</form>
+
+{% if data_listlike %}
+	<div class="row">
+	   <div class="large-12 columns">
+	      <h3>{% trans 'Reservables' %}</h3>
+	   </div>
+	</div>
+	
+	<form id='filter_form' method="GET" action="{% url 'time_view' reservable_set_slug='rezervacije_fri' reservable_type='classroom' %}">
+	
+	{% for i in data %}
+		<div class='row'>
+			<div class="small-12 columns">		    	
+		      {% if not forloop.first %}
+			    <input id="checkbox{{ i.id }}" name='id' type="checkbox" value='{{ i.id }}' checked/><label for="checkbox{{ i.id }}"><a href="{% url 'reservable-detail' i.id %}">{{i.slug}}</a></label>
+			  {% endif %}
+			</div>
+		</div>
+	{% endfor %}
+	<div class="row">
+	  <div class="small-12 columns">  	
+	    <input type="submit" class="button" value="{% trans 'Show' %}"/>
+	  </div>
+    </div>
+	
+	
+{% endif %}	
+{% endblock %}

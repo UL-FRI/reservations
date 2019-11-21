@@ -1,0 +1,321 @@
+{% extends "reservations/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block media %}
+	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+	<script src="{% static "moment/moment-with-langs.js" %}"></script>
+	<script src="{% static "jquery-dateformat/jquery-dateformat.js" %}"></script>
+	<script src="{% static "jquery-form/jquery.form.js" %}"></script>
+	<script src="{% static "foundation-datetimepicker/foundation-datetimepicker.js" %}"></script>
+	<link href="{% static "foundation-datetimepicker/foundation-datetimepicker.css" %}" rel="stylesheet">
+	<script src="{% static "pikaday/pikaday.js" %}"></script>
+	<link href="{% static "pikaday/pikaday.css" %}" rel="stylesheet">
+	<script src="{% static "phpjs/datetime/date.js" %}"></script>
+	<script src="{% static "js/time_view.js" %}"></script>
+	<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+	<link href="https://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
+	<link href="{% static "foundation_icons/foundation-icons.css" %}" rel="stylesheet">
+        <style>
+
+		.close {
+			background: #606061;
+			color: #FFFFFF;
+			line-height: 25px;
+			position: absolute;
+			right: -12px;
+			text-align: center;
+			top: -10px;
+			width: 24px;
+			text-decoration: none;
+			font-weight: bold;
+			-webkit-border-radius: 12px;
+			-moz-border-radius: 12px;
+			border-radius: 12px;
+			-moz-box-shadow: 1px 1px 3px #000;
+			-webkit-box-shadow: 1px 1px 3px #000;
+			box-shadow: 1px 1px 3px #000;
+		}
+
+		.close:hover { background: #00d9ff; }
+
+        .modalDialog {
+			position: fixed;
+			font-family: Arial, Helvetica, sans-serif;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background: rgba(0,0,0,0.8);
+			z-index: 99999;
+			opacity:0;
+			//-webkit-transition: opacity 400ms ease-in;
+			//-moz-transition: opacity 400ms ease-in;
+			//transition: opacity 400ms ease-in;
+			pointer-events: none;
+		 }
+		 
+ 		 .modalDialog:target {
+		     opacity:1;
+		 	 pointer-events: auto;
+		 }	
+		 
+		 .modalDialog > div {
+			width: 400px;
+			position: relative;
+			margin: 10% auto;
+			padding: 5px 20px 13px 20px;
+			border-radius: 10px;
+			background: #fff;
+			background: -moz-linear-gradient(#fff, #999);
+			background: -webkit-linear-gradient(#fff, #999);
+			background: -o-linear-gradient(#fff, #999);
+		}
+		 	 
+          tr:hover{
+            background: #F5F5F5;
+          }	 
+          tr:hover .tableempty{
+            background: #F5F5F5;
+          }
+          tr:hover .tablesingle  {
+            background: #D6E0E8;
+          }
+ 
+          tr:hover .tablemulti  {
+            background: #D6E0E8;
+          }
+
+          tr:hover .tablesomefree{
+            background: #E5E5E8;
+          }
+          
+          td.tabletd {padding: 0px 0px; white-space: nowrap; }
+          .tablecell {display:table; width:100%; height:100%; white-space: nowrap;}
+          
+          a.tablecell.tablesingle {background: #E1EBF4;}
+          td.tablesingle {background: #E1EBF4;}
+          td.tablesingleselected {background: #D6E0E8; }
+          
+          a.tablecell.tablemulti {background: #E1EBF4;}
+          td.tablemulti {background: #E1EBF4;}
+          td.tablemultiselected {background: #D6E0E8;}
+
+          a.tablecell.tablesomefree {background: #E1FF00;}
+          td.tablesomefree {background: #E1FF00; }
+          td.tablesomefreeselected { background: #E5E5E8; }
+          
+          a.tablecell.tableempty {background: #ffffff;}
+          td.tableempty {background: #ffffff;}
+          td.tableemptyselected {background: #F5F5F5;}
+          
+          
+          div.wooshable {  /* div containint single table */
+            position:absolute;            
+            /* transition length 1s, major browsers support */
+            -webkit-transition: All 0.5s;
+            -moz-transition: All 0.5s;
+            -o-transition: All 0.5s;
+            transition: All 0.5s;
+                        
+            transition-timing-function: linear;
+            -webkit-transition-timing-function: ease-in-ease-out; /* Safari and Chrome */
+            -moz-transition-timing-function: linear;
+            -o-transition-timing-function: linear;
+          
+            /* preserve 3d on transformation on all children, major browsers support */ 
+            -webkit-transform-style: preserve-3d;
+            -moz-transform-style: preserve-3d;
+            -o-transform-style: preserve-3d;
+            transform-style: preserve-3d;            
+          }
+
+          #wush_tables {
+            position:relative;
+            -webkit-perspective: 1000px;
+            -moz-perspective: 1000px;
+            -o-perspective: 1000px;
+            perspective: 1000px;
+                        
+          }
+
+          #wush_tables table {
+            -webkit-transition: All 1s;
+            -moz-transition: All 1s;
+            -o-transition: All 1s;
+            transition: All 1s;
+                        
+            transition-timing-function: ease-in-out;
+            -webkit-transition-timing-function: ease-in-out; /* Safari and Chrome */
+            -moz-transition-timing-function: ease-in-out;
+            -o-transition-timing-function: ease-in-out;                        
+          }
+                    
+          body {overflow-x:hidden;}
+          
+        </style>	
+{% endblock %}
+
+
+
+
+{% load tz %}
+
+{% block left_navigation_bar %}
+
+<li class="divider"></li>
+
+<li class="has-form">
+  <button id='wush_left' class=button>&lt;</button>
+</li>
+
+<li class="has-form">
+  <div class="row collapse">
+    <div class="small-12 columns">
+      <input type='text' id="datepicker" />
+    </div>
+  </div>
+</li>
+
+<li class="has-form">
+  <button id='wush_right' class=button>&gt;</button>
+</li>
+
+<li class="name">
+  <h1 id='datepicker_opener' style='color: white;'></h1>
+</li>
+
+<li class="has-form">
+  <img id='ajax_loader' src="{% static "images/ajax-loader.gif" %}" />
+</li>
+
+{% endblock %}
+
+{% block right_navigation_bar %}
+
+{% endblock %}
+
+
+{% block body %}
+
+<div class=row id='row_anchor'>
+  <div class="small-12 column">
+  </div>
+</div>
+
+<div id="zoom_in_modal" class="modalDialog">
+  <div>This should be invisible, zoom in.</div>
+</div>
+
+<div id="zoom_out_modal" class="modalDialog">
+  <div>This should be invisible, zoom out.</div>
+</div>
+
+<div id='wush_tables' style='display: none'>
+
+<div class="row wooshable" id='row_reservables' style='left: 0px; z-index: 1'> 
+    <table id='table_reservables' style="position: absolute">
+      <thead>
+        <tr>
+          <th class="tabletd"><a href="#zoom_in_modal">+</a>
+          </th>
+        </tr>        
+      </thead>
+      <tbody>
+       <!--
+			Filled in JS code.
+        -->
+      </tbody>
+    </table>
+</div>
+
+<div class="row wooshable" id='row_reservables1' style='left: 0px; z-index: 1'> 
+    <table id='table_reservables1' style="position: absolute">
+      <thead>
+        <tr>
+          <th class="tabletd tablecell"><a href="#zoom_out_modal">-</a>
+          </th>
+        </tr>        
+      </thead>
+      <tbody>
+       <!--
+			Filled in JS code.
+        -->
+      </tbody>
+    </table>
+</div>
+
+
+<div class="row wooshable" id='row_today' style='left: 0px'> 
+    <table id='table_today' width='100%'> </table>	
+</div>
+
+<div class="row wooshable" id='row_tomorrow' style='left: 0px'>
+    <table id='table_tomorrow' width='100%'></table>	
+</div>
+
+<div class="row wooshable" id='row_tomorrow2' style='left: 0px'>
+    <table id='table_tomorrow2' width='100%'></table>	
+</div>
+
+<div class="row wooshable" id='row_yesterday' style='left: 0px'>
+    <table id='table_yesterday' width='100%'></table>	
+</div>
+
+<div class="row wooshable" id='row_yesterday2' style='left: 0px'>
+    <table id='table_yesterday2' width='100%'></table>	
+</div>
+</div>
+
+<div class="row" id='table_static_div'>
+  <div class="small-12 column">
+    <table width='100%'>
+      <thead>
+        {% if data.label_fmts.zoom_out %}
+        <tr>
+          <th></th>
+          {% for i in data.zoom_out_list %}
+          <th colspan={{i.span}}>{% for j in i.ranges %}<a href="{% url "time_view" reservable_set_slug=data.reservable_set_slug reservable_type=data.reservable_type %}?start={{j.start|localtime|date:"Y-m-d H:i:s"}}&end={{j.end|localtime|date:"Y-m-d H:i:s"}}&zoom={{data.zoom_out}}">{{j.start|date:data.label_fmts.zoom_out}} - {{j.end|date:data.label_fmts.zoom_out}}</a> {% endfor %}</th>
+          {% endfor %}
+        </tr>
+        {% endif %}
+        {% if data.label_fmts.zoom_in %}
+        <tr>
+          <th></th>
+          {% for i in data.zoom_in_list %}
+          <th colspan={{i.span}}>{% for j in i.ranges %}<a href="{% url "time_view" reservable_set_slug=data.reservable_set_slug reservable_type=data.reservable_type %}?start={{j.start|localtime|date:"Y-m-d H:i:s"}}&end={{j.end|localtime|date:"Y-m-d H:i:s"}}&zoom={{data.zoom_in}}">{{j.start|date:data.label_fmts.zoom_in}} - {{j.end|date:data.label_fmts.zoom_in}}</a> {% endfor %}</th>
+          {% endfor %}
+        </tr>
+        {% endif %}
+ 
+        <tr>
+          <th>Reservable</th>
+          {% for i in data.time_list %} 
+          <th>{{i.start|date:data.label_fmts.start}} - {{i.end|date:data.label_fmts.end}}</th>
+          {% endfor %}
+        </tr>      
+      </thead>
+      <tbody>
+        {% for j in data.res_list %}
+        <tr>
+          <td class="tabletd">
+            <a href="{% url "reservable-detail" j.reservable.id %}">{{j.reservable.slug}}</a>
+          </td>
+          {% for i in j.reservations %}
+          <td class="tabletd">
+            {% if i.reservations|length == 1 and not i.free_percentage > 0 %}
+            <a href="{% url "reservation-detail" i.reservations.0 %}" class="tablecell tablesingle">&nbsp;{{i.free_percentage}}</a>
+            {% else %}
+            <a href="{% url "reservation-list" %}?start={{i.start|localtime|date:"Y-m-d H:i:s"}}&end={{i.end|localtime|date:"Y-m-d H:i:s"}}&reservables={{j.reservable.id}}" class="tablecell{% if i.free_percentage == 1.0 %} tableempty{% elif i.free_percentage > 0 %} tablesomefree{% elif i.reservations  %} tablemulti{% endif %}">&nbsp;{{i.free_percentage}}</a>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+	
+	
+{% endblock %}

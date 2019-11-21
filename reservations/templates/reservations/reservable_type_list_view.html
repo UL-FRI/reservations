@@ -1,0 +1,27 @@
+{% extends "reservations/base.html" %}
+
+{% load tz %}
+
+{% block header %}
+    <div class="row">
+      <div class="large-12 columns">
+        <h1>Rezervacije</h1>
+      </div>
+    </div>
+{% endblock %}
+
+
+{% block body %}
+
+<div class="row">
+    <div class="small-10 columns">
+	<ul>
+	{% for t in reservable_types %}
+		<li><a href="{% url "time_view" reservable_type=t reservable_set_slug=reservable_set.slug %}">{{t}}</a></li>
+	{% endfor %}
+	</ul>
+    </div>
+</div>
+	
+	
+{% endblock %}

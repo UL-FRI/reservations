@@ -1,0 +1,85 @@
+{% extends "reservations/base.html" %}
+
+{% load rest_framework %}
+
+{% block media %}
+    <script src="{{STATIC_URL}}/zmultiselect/zurb5-multiselect.js"></script>
+{% endblock %}
+
+
+{% block body %}
+
+{% block breadcrumbs %}
+<div class='row'>
+	<div class="small-12 columns">
+		<nav class="breadcrumbs">
+	    	{% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+	        	<li>
+	                <a href="{{ breadcrumb_url }}" {% if forloop.last %}class="current"{% endif %}>{{ breadcrumb_name }}</a> 
+	            </li>
+	        {% endfor %}
+	    </nav>
+	</div>
+</div>
+{% endblock %}
+
+<div>
+
+
+<div class='row'>
+	<div class="small-12 columns">	    
+            <div class="page-header"><h1>{{ name }}</h1></div>
+	</div>
+</div>	    
+
+<div class='row'>
+	<div class="small-12 columns">	    
+	    {% block description %}
+    	    {{ description }}
+        {% endblock %}
+
+        {% if display_edit_forms %}
+        
+                {% if post_form %}
+                 {% with form=post_form %}
+                 <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+                     <fieldset>
+                         {{ post_form }}
+                         <div class="form-actions">
+                             <button title="Make a POST request on the {{ name }} resource">POST</button>
+                         </div>
+                     </fieldset>
+                 </form>
+                 {% endwith %}
+                {% endif %}
+
+                {% if put_form %}
+                   <div id="object-form">
+                       <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data">
+                           <fieldset>
+                               {{ put_form }}
+                               <div class="form-actions">
+                                   <button name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="PUT" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                               </div>
+                           </fieldset>
+                       </form>
+                   </div>
+                {% endif %}
+        {% endif %}        
+    </div> <!-- 12 Column -->
+</div>     <!-- row -->
+
+
+
+{% if delete_form %}
+<div class='row'>
+	<div class="small-12 columns">	    
+	    <form action="{{ request.get_full_path }}" method="POST">
+	        {% csrf_token %}
+	        <input type="hidden" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="DELETE" />
+	        <button title="Make a DELETE request on the {{ name }} resource">DELETE</button>
+	    </form>
+	</div>
+</div>	    
+{% endif %}
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "reservations/base.html" %}
+
+{% load rest_framework %}
+
+{% block media %}
+    <script src="{{STATIC_URL}}/zmultiselect/zurb5-multiselect.js"></script>
+{% endblock %}
+
+{% block body %}
+
+{% block breadcrumbs %}
+<div class='row'>
+	<div class="small-12 columns">
+		<nav class="breadcrumbs">
+	    	{% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+	        	<li>
+	                <a href="{{ breadcrumb_url }}" {% if forloop.last %}class="current"{% endif %}>{{ breadcrumb_name }}</a> 
+	            </li>
+	        {% endfor %}
+	    </nav>
+	</div>
+</div>
+{% endblock %}
+
+
+<div class='row'>
+	<div class="small-12 columns">
+		<div id="res-list">
+		    <ul>
+		    	{% for i in data %}
+		        	<li><a href="{{i.id}}/">{{i}}</a></li>
+		    	{% endfor %}
+		    </ul>
+		</div>
+	</div>
+</div>
+
+
+{% if 'GET' in allowed_methods %}
+<div class='row'>
+	<div class="small-12 columns">	    
+	    <form id="get-form">
+	        <fieldset>
+	            <div>
+	                <a href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource" data-dropdown="available_formats_drop" class="button dropdown">
+	                	Specify format
+	                </a>
+	                <br> 
+	                <ul id="available_formats_drop" data-dropdown-content class="f-dropdown"> 
+	                	{% for format in available_formats %}
+	                    <li>
+	                    	<a href='{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}' rel="nofollow" title="Make a GET request on the {{ name }} resource with the format set to `{{ format }}`">{{ format }}</a>
+	                    </li>
+	                	{% endfor %}	                
+	                </ul>
+	            </div>
+	        </fieldset>
+	    </form>	    
+	</div>
+</div>	    
+{% endif %}
+
+
+
+{% if delete_form %}
+    <form class="button-form" action="{{ request.get_full_path }}" method="POST" class="pull-right">
+        {% csrf_token %}
+        <input type="hidden" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="DELETE" />
+        <button class="btn btn-danger js-tooltip" title="Make a DELETE request on the {{ name }} resource">DELETE</button>
+    </form>
+{% endif %}
+
+
+
+<div class='row'>
+	<div class="small-12 columns">	        
+         <h1>{{ name }}</h1>
+	</div>
+</div>	
+
+<div class='row'>
+	<div class="small-12 columns">	           
+         {% block description %}
+         	{{ description }}
+         {% endblock %}
+
+
+         {% if display_edit_forms %}         
+             {% if post_form %}
+	             {% with form=post_form %}
+	             <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class='custom'>
+	                 <fieldset>
+	                     {{ post_form }}
+                         <button title="Make a POST request on the {{ name }} resource">POST</button>
+	                 </fieldset>
+	             </form>
+	             {% endwith %}                
+             {% endif %}
+             
+
+             {% if put_form %}
+             
+                     <div class="tab-pane" id="object-form">
+                         <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+                             <fieldset>
+                                 {{ put_form }}
+                                 <div class="form-actions">
+                                     <button class="btn btn-primary js-tooltip" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="PUT" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                                 </div>
+                             </fieldset>
+                         </form>
+                     </div>
+                     {% endif %}
+                 </div>
+             </div>
+             {% endif %}
+	 </div>
+
+	</div>
+	
+	
+	</div>  <!-- 12 columns -->
+</div>      <!-- row -->
+	
+	
+    <script>
+	 $( "select[name=reservablesets] option:selected" ).each(function() {
+		 $( this ).attr('data-selected', 'true');
+		 a = 10/0;
+	 });
+     $("select[name=reservablesets]").zmultiselect({
+     live: false,
+     placeholder: "Reservablesets",
+     filter: false
+     });
+    </script>
+	
+{% endblock %}

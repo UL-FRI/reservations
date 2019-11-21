@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+{% load i18n %}
+{% load static %}
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="{% static "foundation-5.5.1/js/vendor/jquery.js" %}"></script>
+    <link rel="stylesheet" href="{%  static "foundation-5.5.1/css/foundation.css" %}" />
+    <link rel="stylesheet" href="{%  static "zmultiselect/zurb5-multiselect.css" %}" />
+    <link rel="stylesheet" href="{% static "zurb-responsive-tables/responsive-tables.css" %}" />
+    <script src="{% static "zurb-responsive-tables/responsive-tables.js" %}"></script>
+    <script src="{% static "foundation-5.5.1/js/vendor/modernizr.js" %}"></script>
+    {% block media %}{% endblock %}
+</head>
+
+
+<body>
+    <div id="header">
+
+{% block header %}
+<div class=fixed>
+
+<nav class="top-bar" data-topbar role="navigation">
+  <ul class="title-area">
+    <li class="name"><h1><a href="/reservations/sets/rezervacije_fri/types/classroom/time_view">{% trans 'Reservations' %}</a></h1></li>
+  </ul>
+
+  <section class="top-bar-section">
+    <!-- Top Bar Left Nav Elements -->
+    <ul class="left">
+      {% block left_navigation_bar %}{% endblock %}
+      <!-- Search | has-form wrapper -->
+    </ul>
+
+    <!-- Top Bar Right Nav Elements -->
+    <ul class="right">
+	  {% block right_navigation_bar %}{% endblock %}
+	  <li class="has-form">
+  		<a href="{% url 'filtered_reservables-list' reservable_type=reservable_type reservable_set_slug=reservable_set_slug %}"><img id='search_icon' src="{% static "/images/search.png" %}" /></a>
+	  </li> 
+      <!-- Divider -->
+      <li class="divider"></li>
+      {% if not user.is_authenticated %}
+      <li class="leaf"><a href={% url 'login' %}>{% trans 'Login' %}</a></li>
+      {% else %}
+      <li class="has-dropdown">
+        <a href="#">{{ request.user.username }}</a>
+        <ul class="dropdown">
+          <li><a href="{% url 'my_reservation-list'  reservable_type=reservable_type reservable_set_slug=reservable_set_slug  %}" data-reveal-id="myModal" data-reveal-ajax="true">{% trans 'My reservations' %}</a></li>
+        </ul>
+      </li>
+      {% endif %}
+    </ul>
+  </section>
+</nav>
+ </div>
+ 
+ {% endblock %}
+ 
+ 
+    <div id="body">
+    	<!-- For displaying modal dialogs -->
+    	<div id="myModal" class="reveal-modal" data-reveal data-options="close_on_background_click:false;close_on_esc:false;multiple_opened:false;"></div>
+    	<div id="mySubModal" class="reveal-modal" data-reveal data-options="close_on_background_click:false;close_on_esc:false;multiple_opened:false;"></div>
+    
+{% block body %}
+        <pre>
+           ZACETEK:
+
+Mali zeleni moz
+
+Razpokane ustnice se naslanjajo nad lijakom,
+(vse pocne ravno tako kot mu je rekel diakon),
+potegne ga iz petnih zil - mastic, da ne bo pomote -
+in pljune v lijak, v katerem trza krak rjave krote.
+
+Zeleni pljunek, imenujmo ga Ambroz, spolzi,
+spolzi, ves masten kot je, skozi stare cevi.
+Od podstresja, kjer bela kopalnica stoji,
+Ambrozeva pot mimo stare kleti drzi...
+
+Pozabil sem omeniti... to dogaja se na vasi,
+kot vsako drugo hiso tudi to greznica krasi.
+V podzemlju temnem tiha, smrdljiva jama...
+tako odurna, pa vendar ocarljiva in - sama.
+
+V to votlino Amroz prestrasen pripluje
+a glej ga zlomka, kamor pripotuje,
+tam ni sam; osamljen zeleni mozic ga gleda,
+oba preplasena, oba tako bleda!
+Ambrozu se posveti, kaj moz z njim storiti hoce -
+ker v greznici ni jela, le voda od popoldanske toce,
+pojedel ga bo! O groza in strah, sedem krizev in tezav,
+nas mastic dosti je ze prezivel, a kako bo to zdrzal?
+
+Mozic se mu pribliza in ga nemudoma posesa,
+s hitrim srkom, le delcek sekunde Amrozu se ostane,
+vdihne se zadnjic smrdljivi zrak te preklete jame
+in se na pot navzdol po suhem grlu poda. [oklepajoca kao-rima]
+
+Mali moz se oblizne zadovoljen in vesel,
+sedaj ni vec tako ubog, kar precej je ze debel!
+Matevz mu od zgoraj vsak dan nesebicno
+poslje mastic ali dva - res licno.
+
+Vsako jutro poslje Matevz navzdol kaksnega zelenega,
+v veseli, srecni, zadovoljni simbiozi ali sozitju,
+ne zavedajoc se sploh eksistence drug drugega,
+zivita Matevz in mozicelj skoraj tako skupaj kot v enem bitju.
+
+.... Pustimo ju, kot tudi vse druge! Naj zivita in zive!....
+
+Opomba Pikice(tm): "To ni sozitje,
+pri sozitju imata obe bitji korist,
+tu pa zivi od pljunkov le zeleni mozic!"
+
+KONEC  
+        </pre>
+{% endblock %}
+    </div>
+    
+    <script src="{% static "foundation-5.5.1/js/foundation.min.js" %}"></script>
+    
+    <script>
+      $(document).foundation();
+    </script>
+</body>
+</html>

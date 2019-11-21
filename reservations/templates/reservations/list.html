@@ -1,0 +1,131 @@
+{% extends "reservations/base.html" %}
+
+{% load rest_framework %}
+
+{% block media %}
+    <script src="{{STATIC_URL}}/jquery-form/jquery.form.js"></script>
+	<script src="{{STATIC_URL}}/foundation-datetimepicker/foundation-datetimepicker.js"></script>
+	<link href="{{STATIC_URL}}/foundation-datetimepicker/foundation-datetimepicker.css" rel="stylesheet">	
+
+    <script src="{{STATIC_URL}}/chosen/chosen.jquery.js"></script>    
+	<link href="{{STATIC_URL}}/chosen/chosen.css" rel="stylesheet">
+    
+    
+{% endblock %}
+
+
+{% block header %}
+
+
+    <div class="row">
+      <div class="large-12 columns">
+        {% if post_form %}
+        <h1>Create</h1>
+        {% endif %}
+        
+      </div>
+    </div>
+{% endblock %}
+
+
+{% block body %}
+
+{% if delete_form %}
+    <form class="button-form" action="{{ request.get_full_path }}" method="POST" class="pull-right" data-abide>
+        {% csrf_token %}
+        <input type="hidden" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="DELETE" />
+        <button class="btn btn-danger js-tooltip" title="Make a DELETE request on the {{ name }} resource">DELETE</button>
+    </form>
+{% endif %}
+
+
+<div class='row'>
+	<div class="small-12 columns">	           
+         {% block description %}
+         	{{ description }}
+         {% endblock %}
+         {% if display_edit_forms %}         
+             {% if post_form %}
+	             {% with form=post_form %}
+	             <form id='post_form' action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class='custom' data-abide>
+	                 <fieldset>
+	                     {{ post_form }}
+                         <button title="Make a POST request on the {{ name }} resource">POST</button>
+	                 </fieldset>            
+	             </form>
+	             {% endwith %}                
+             {% endif %}
+             
+
+             {% if put_form %}
+                     <div class="tab-pane" id="object-form">
+                         <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" data-abide>
+                             <fieldset>
+                                 {{ put_form }}
+                                 <div class="form-actions">
+                                     <button class="btn btn-primary js-tooltip" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="PUT" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                                 </div>
+                             </fieldset>
+                         </form>
+                     </div>
+                     {% endif %}
+                 </div>
+             </div>
+             {% endif %}
+	 </div>
+	</div>
+	</div>  <!-- 12 columns -->
+</div>      <!-- row -->
+
+
+{% if data_listlike %}
+ <div class="row">
+   <div class="large-12 columns">
+     <h3>List</h3>
+   </div>
+ </div>
+<div class='row'>
+	<div class="small-12 columns">
+		<div id="res-list">
+		    <ul>
+		    	{% for i in data %}
+		        	<li><a href="{{i.id}}/">{{i}}</a></li>
+		    	{% endfor %}
+		    </ul>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+	
+	
+    <script>
+
+    function getUrlVars()
+    {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            if(!(hash[0] in vars)) {
+            	vars[hash[0]] = [];
+            }
+            vars[hash[0]].push(hash[1]);
+        }
+        return vars;
+    }
+
+    $(document).ready(function() {
+	    $("#post_form").ajaxForm(
+	      function() {	    	
+	    	window.opener.reload();
+	    	window.close();
+	    	return false;
+	      }
+	    );	      
+    });
+
+    </script>
+	
+{% endblock %}

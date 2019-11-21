@@ -1,0 +1,168 @@
+{% extends "reservations/base.html" %}
+
+{% load rest_framework %}
+
+{% block media %}
+    <script src="{{STATIC_URL}}/jquery-form/jquery.form.js"></script>
+	<script src="{{STATIC_URL}}/foundation-datetimepicker/foundation-datetimepicker.js"></script>	
+	<link href="{{STATIC_URL}}/foundation-datetimepicker/foundation-datetimepicker.css" rel="stylesheet">	
+    
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+
+{% block body %}
+
+{% block breadcrumbs %}
+<!-- <div class='row'> -->
+<!-- 	<div class="small-12 columns"> -->
+<!-- 		<nav class="breadcrumbs"> -->
+<!-- 	    	{% for breadcrumb_name, breadcrumb_url in breadcrumblist %} -->
+<!-- 	        	<li> -->
+<!-- 	                <a href="{{ breadcrumb_url }}" {% if forloop.last %}class="current"{% endif %}>{{ breadcrumb_name }}</a>  -->
+<!-- 	            </li> -->
+<!-- 	        {% endfor %} -->
+<!-- 	    </nav> -->
+<!-- 	</div> -->
+<!-- </div> -->
+{% endblock %}
+
+<div>
+
+
+   
+
+
+
+<div class='row'>
+	<div class="small-12 columns">	    
+            <div class="page-header"><h1>{{data.name}}</h1></div>
+	</div>
+</div>	    
+
+<div class='row'>
+	<div class="small-12 columns">	    
+	    {% block description %}
+    	    {{ description }}
+        {% endblock %}
+        {% block resource_list%}
+          <div id="resources">
+            <ul>
+          {% for r in data.nresources_set %}
+            <li>{{r.n}} x {{r.resource.name}}</li>
+          {% endfor %}
+          <a href="/reservations/sets/rezervacije_fri/types/classroom/reservable_resources">Seznam lastnosti vseh predavalnic</a>           
+            </ul>
+          </div>
+        {% endblock %} 
+        {% if display_edit_forms %}        
+                {% if post_form %}
+                 {% with form=post_form %}
+                 <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" data-abide>
+                     <fieldset>
+                         {{ post_form }}                         
+                         <div class="form-actions">
+                             <button title="Make a POST request on the {{ name }} resource">POST</button>
+                         </div>
+                     </fieldset>
+                 </form>
+                 {% endwith %}
+                {% endif %}
+                {% if put_form %}
+                   <div id="object-form">
+                       <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" data-abide>
+                           <fieldset>
+                               {{ put_form }}
+                               <div class='row'>
+                                   <div class='small-6 columns'>
+		                               <div class="form-actions">
+    		                               <button name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="PUT" title="Make a PUT request on the {{ name }} resource">Update</button>
+        		                       </div>
+        		                   </div>
+        	                   </div>
+                               
+                           </fieldset>
+                      </form>
+                   </div>                   
+              {% endif %}
+        {% endif %}        
+    </div> <!-- 12 Column -->
+</div>     <!-- row -->
+
+
+
+{% if delete_form %}
+<div class='row'>
+	<div class="small-12 columns">	    
+	    <form id='delete_form' action="{{ request.get_full_path }}" method="POST" data-abide>
+	        {% csrf_token %}
+	        <input type="hidden" name="{{ api_settings.FORM_METHOD_OVERRIDE }}" value="DELETE" />
+	        <button title="Make a DELETE request on the {{ name }} resource">DELETE</button>
+	    </form>
+	</div>
+</div>	    
+{% endif %}
+
+
+ <script>
+ $(document).ready(function() {
+
+    prepopulate = [];	
+    $( "select[name=reservables] option:selected" ).each(function() {
+    	
+		//$( this ).attr('data-selected', 'true');
+    	var reservable_id = $( this ).attr('value');
+    	var reservable_name = $( this ).text();
+		prepopulate.push({id: reservable_id, name: reservable_name});		
+	});
+    
+    //$("select[name=reservables]").chosen();    
+    
+//     $("select[name=reservables]").remove();
+    
+//     $("#selected_reservables").tokenInput("http://localhost:8000/reservations/reservables/?format=json", {
+//                 hintText: "Vpiši ime",
+//                 noResultsText: "Ni zadetkov",
+//                 searchingText: "Iščem...",
+//                 queryParam: "name",
+//                 minChars: "3",
+//                 propertyToSearch: "name",
+//                 resultsFormatter: function(item){ 
+//                    return "<li><div style='display: inline-block; padding-left: 10px;'><div class='full_name'>" + item.name + "</div><div class='type'>" + item.type + "</div></div></li>" 
+//                 },
+//                 tokenFormatter: function(item) { return "<li><p>" + item.name + " (" + item.type + ")</p></li>" },
+//                 prePopulate: prepopulate,
+//             });
+    
+//     // Change name to reservables
+//     $("#selected_reservables").attr('name', 'reservables');
+    
+        
+    $("#delete_form").ajaxForm(
+ 	    function() {	    	
+ 	 		window.opener.reload();
+ 	 	    window.close();
+ 	 	    return false;
+ 	 	}
+ 	);	      
+
+ 	    
+	    // add required to reason
+	    var $reason = $("input[name='reason']");
+	    $reason.attr('required', 'true');
+	    var $div = $reason.parent();
+	    $div.append($('<small>').addClass('error').text('Polje mora biti izpolnjeno'));	    
+ 	    
+ 	    
+ 	    // date time picker
+	    $("input[name='start']").fdatetimepicker();
+	    $("input[name='end']").fdatetimepicker();
+
+         
+ });
+ </script>
+
+
+{% endblock %}

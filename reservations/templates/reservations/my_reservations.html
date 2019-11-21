@@ -1,0 +1,50 @@
+{% load i18n %}
+{% load rest_framework %}
+
+<p><a class="close-reveal-modal">&#215;</a></p>
+
+
+<div class='row'>
+	<div class="small-12 columns">	           
+         {% block description %}
+         	{{ description }}
+         {% endblock %}
+	</div>  <!-- 12 columns -->
+</div>      <!-- row -->
+
+
+<div class="row"> 
+  <div class="large-12 columns"> 
+    <h3>{% trans 'My reservations' %}</h3>
+  </div>
+</div>
+
+
+<div class='row'>
+  <div class="small-12 columns">  
+	  <table> 
+	    <thead> 
+	      <tr> 
+	        <th>{% trans 'reason' %}</th> 
+	        <th>{% trans 'start' %}</th>
+	        <th>{% trans 'end' %}</th>
+	        <th>{% trans 'reservables' %}</th>  
+	      </tr> 
+	    </thead> 
+	    <tbody>
+	    	{% for i in data.results %} 
+	    	<tr> 
+	    	  <td><a href="{% url 'reservation-detail' i.id %}" data-reveal-id="mySubModal" data-reveal-ajax="true">{{i.reason}}</a></td> 
+	    	  <td>{{ i.start }}</td> 
+	    	  <td>{{ i.end }}</td> 
+	    	  <td>
+	    	    {% for reservable in i.reservables %}
+	    	    	<a href="{% url 'reservable-detail' reservable.id %}">{{ reservable.slug }}</a>  {% if not forloop.last %}, {% endif %}
+	    	    {% endfor %}
+	    	  </td>
+	    	</tr> 
+			{% endfor %}
+	    </tbody> 
+	  </table>
+  </div>
+</div>
