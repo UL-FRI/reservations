@@ -1,0 +1,17 @@
+Django~=4.0.2
+django-guardian~=2.4.0
+djangorestframework~=3.13.1
+django-filter~=21.1
+
+[package]
+twine
+wheel
+
+[test]
+black>=22.1.0
+coverage>=6.2.0
+flake8>=4.0.1
+pydocstyle>=6.1.1
+readme_renderer
+setuptools_scm
+isort>=5.10.1

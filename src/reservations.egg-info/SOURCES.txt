@@ -1,0 +1,9 @@
+LICENSE
+README.rst
+setup.cfg
+setup.py
+src/reservations.egg-info/PKG-INFO
+src/reservations.egg-info/SOURCES.txt
+src/reservations.egg-info/dependency_links.txt
+src/reservations.egg-info/requires.txt
+src/reservations.egg-info/top_level.txt
