@@ -31,12 +31,12 @@ setuptools.setup(
         "reservations": [
         ]
     },
-    python_requires=">=3.9, <3.11",
+    python_requires=">=3.10, <3.11",
     install_requires=[
-        "Django~=4.0.2",
+        "Django~=4.1.0",
         "django-guardian~=2.4.0",
-        "djangorestframework~=3.13.1",
-        "django-filter~=21.1",
+        "djangorestframework~=3.14.0",
+        "django-filter~=22.1",
     ],
     extras_require={
         "package": [
@@ -44,9 +44,9 @@ setuptools.setup(
             "wheel",
         ],
         "test": [
-            "black>=22.1.0",
-            "coverage>=6.2.0",
-            "flake8>=4.0.1",
+            "black>=22.10.0",
+            "coverage>=6.5.0",
+            "flake8>=5.0.4",
             "pydocstyle>=6.1.1",
             "readme_renderer",
             "setuptools_scm",
