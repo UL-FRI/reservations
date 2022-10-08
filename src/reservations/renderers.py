@@ -8,28 +8,17 @@ REST framework also provides an HTML renderer the renders the browsable API.
 """
 from __future__ import unicode_literals
 
-import copy
-import json
-import django
-from django import forms
-from django.core.exceptions import ImproperlyConfigured
-from django.http.multipartparser import parse_header
-from django.template import RequestContext, loader, Template
-from django.test.client import encode_multipart
-from django.utils.xmlutils import SimplerXMLGenerator
-from django.urls import resolve
-from rest_framework.exceptions import ParseError
-from rest_framework.settings import api_settings
-from rest_framework.request import is_form_media_type, override_method
-from rest_framework.utils import encoders
-from rest_framework.utils.breadcrumbs import get_breadcrumbs
-from rest_framework import exceptions, status, VERSION
-from rest_framework.renderers import BaseRenderer
+
+from django.template import RequestContext, Template, loader
 from django.template.loader import render_to_string
-from django.template import loader
+from django.urls import resolve
 
-
-from rest_framework.renderers import TemplateHTMLRenderer, BrowsableAPIRenderer
+from rest_framework import VERSION, exceptions, status
+from rest_framework.exceptions import ParseError
+from rest_framework.renderers import BaseRenderer, BrowsableAPIRenderer
+from rest_framework.request import is_form_media_type, override_method
+from rest_framework.settings import api_settings
+from rest_framework.utils.breadcrumbs import get_breadcrumbs
 
 
 class HTMLFormRenderer(BaseRenderer):
@@ -49,29 +38,24 @@ class HTMLFormRenderer(BaseRenderer):
     template = "rest_framework/inline/form.html"
     charset = "utf-8"
 
-
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """
         Render serializer data and return an HTML form, as a string.
         """
         renderer_context = renderer_context or {}
-        request = renderer_context["request"]
-
-        template = loader.get_template(self.template)
-        context = RequestContext(request, {"form": data})
-        print("COntext", context)
         return render_to_string(self.template, renderer_context)
 
 
 class TemplateRenderer(BrowsableAPIRenderer):
     """Pass"""
+
     def resolve_template(self, template_names):
         return loader.select_template(template_names)
 
     def get_template_names(self, response, view):
         if response.template_name:
             return [response.template_name]
-        elif hasattr(self, "template_name") :
+        elif hasattr(self, "template_name"):
             return [self.template_name]
         elif hasattr(view, "get_template_names"):
             return view.get_template_names()
@@ -95,30 +79,30 @@ class TemplateRenderer(BrowsableAPIRenderer):
         print("Result", result)
         return result
 
-
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """
         Render the HTML for the browsable API representation.
         """
-        view = renderer_context['view']
-        response = renderer_context['response']
+        view = renderer_context["view"]
+        response = renderer_context["response"]
         template_names = self.get_template_names(response, view)
 
-        self.accepted_media_type = accepted_media_type or ''
+        self.accepted_media_type = accepted_media_type or ""
         self.renderer_context = renderer_context or {}
 
         context = self.get_context(data, accepted_media_type, renderer_context)
         template = self.resolve_template(template_names)
-        ret = template.render(context, request=renderer_context['request'])
+        ret = template.render(context, request=renderer_context["request"])
 
         # Munge DELETE Response code to allow us to return content
         # (Do this *after* we've rendered the template so that we include
         # the normal deletion response code in the output)
-        response = renderer_context['response']
+        response = renderer_context["response"]
         if response.status_code == status.HTTP_204_NO_CONTENT:
             response.status_code = status.HTTP_200_OK
 
         return ret
+
 
 class TemplateAPIRenderer(BaseRenderer):
     """
@@ -304,7 +288,7 @@ class TemplateAPIRenderer(BaseRenderer):
             template = self.resolve_template(template_names)
         context = self.get_context(data, accepted_media_type, renderer_context)
         # context = RequestContext(renderer_context['request'], context)
-        print("Data", data  )
+        print("Data", data)
         data.update(context)
         ret = template.render(data, request=request)
 

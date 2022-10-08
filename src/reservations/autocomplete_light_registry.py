@@ -4,15 +4,13 @@ Created on Jun 17, 2014
 @author: gregor
 """
 
+from autocomplete_light import shortcuts as al
+from guardian.shortcuts import get_objects_for_user
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-
-from guardian.shortcuts import get_objects_for_user
-from autocomplete_light import shortcuts as al
-
 from reservations.models import Reservable, Reservation
-
 
 #
 # autocomplete_light.register(Reservable,

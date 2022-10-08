@@ -1,11 +1,22 @@
-from django.contrib import admin
-from django.contrib.auth.models import Permission
+"""
+Register models in Django admin.
+"""
 
 from guardian.admin import GuardedModelAdmin
 
-from reservations.models import Reservation, Reservable, Resource, NResources
-from reservations.models import ReservableSet, NRequirements, CustomSortOrder
-from reservations.models import UserProfile
+from django.contrib import admin
+from django.contrib.auth.models import Permission
+
+from reservations.models import (
+    CustomSortOrder,
+    NRequirements,
+    NResources,
+    Reservable,
+    ReservableSet,
+    Reservation,
+    Resource,
+    UserProfile,
+)
 
 
 class StudentAdmin(admin.ModelAdmin):

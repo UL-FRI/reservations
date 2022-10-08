@@ -1,23 +1,20 @@
-from django.urls import path, include
+from django.urls import include, path
 from django.views.i18n import JavaScriptCatalog
+
 from rest_framework import routers
+
 from reservations.views import (
-    ResourceViewSet,
-    ReservationViewSet,
+    FilteredReservableViewSet,
     MyReservationsViewSet,
-)
-from reservations.views import (
-    ReservableViewSet,
     ReservableSetViewSet,
-    reservable_set_list_view,
-)
-from reservations.views import (
-    reservable_type_list_view,
+    ReservableViewSet,
+    ReservationViewSet,
+    ResourceViewSet,
     reservable_resource_view,
+    reservable_set_list_view,
+    reservable_type_list_view,
     time_view,
 )
-from reservations.views import FilteredReservableViewSet
-
 
 router = routers.DefaultRouter()
 router.register(r"resources", ResourceViewSet)

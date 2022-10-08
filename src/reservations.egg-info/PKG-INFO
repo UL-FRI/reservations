@@ -1,14 +1,13 @@
 Metadata-Version: 2.1
 Name: reservations
-Version: 0.0.0
+Version: 0.1.dev13+g40265ef.d20221008
 Summary: Open source reservation system written in Django
 Home-page: https://github.com/UL-FRI/reservations
 Author: Gašper Fele-Žorž and Gregor Jerše
 Author-email: polz@aufbix.org
 License: GNU Affero General Public License (3.0)
 Keywords: FRI reservations django
-Platform: UNKNOWN
-Classifier: Development Status :: 4 - Beta
+Classifier: Development Status :: 5 - Production
 Classifier: Environment :: Web Environment
 Classifier: Framework :: Django
 Classifier: Intended Audience :: Developers
@@ -21,9 +20,8 @@ Classifier: License :: OSI Approved :: GNU General Public License v3 or later (G
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.9
 Classifier: Programming Language :: Python :: 3.10
-Requires-Python: >=3.9, <3.11
+Requires-Python: >=3.10, <3.11
 Description-Content-Type: text/x-rst
 Provides-Extra: package
 Provides-Extra: test
@@ -34,5 +32,3 @@ Reservations
 ============
 
 This is Django application used for room Reservations at FRI.
-
-

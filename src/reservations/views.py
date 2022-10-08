@@ -1,33 +1,40 @@
-# -*- coding: utf-8 -*-
-from collections import OrderedDict
-from datetime import timedelta, datetime
-from heapq import *
+"""Reservation application views."""
+
 import math
+from datetime import datetime, timedelta
+from heapq import *
+
+import autocomplete_light
 from django_filters.rest_framework import DjangoFilterBackend
 from guardian.core import ObjectPermissionChecker
 
 from django.conf import settings
-from django.forms.models import model_to_dict
-from django.utils.timezone import now, get_default_timezone
-from django.utils.translation import gettext_lazy as _
 from django.core.mail import send_mass_mail
-from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.urls import resolve
+from django.forms.models import model_to_dict
+from django.urls import resolve, reverse
+from django.utils.timezone import get_default_timezone, now
+from django.utils.translation import gettext_lazy as _
 
 import rest_framework
-from rest_framework import viewsets, serializers, filters, permissions
+from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.renderers import BrowsableAPIRenderer
 
-from reservations.models import Reservable, ReservableSet, CustomSortOrder
-from reservations.models import Resource, NResources, Reservation, UserProfile
+from reservations.models import (
+    CustomSortOrder,
+    NResources,
+    Reservable,
+    ReservableSet,
+    Reservation,
+    Resource,
+    UserProfile,
+)
 from reservations.renderers import TemplateRenderer
 
 
 @api_view(["GET"])
+class ListReservables()
 @permission_classes((AllowAny,))
 def reservable_set_list_view(request):
     reservable_sets = ReservableSet.objects.all()
@@ -577,15 +584,19 @@ class ReservationPermission(permissions.BasePermission):
         return True
 
 
+from dal import autocomplete
+
+autocomplete.Select2QuerySetView
+
+
 class ReservationSerializer(serializers.ModelSerializer):
     reservables = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True,
         label=Reservation.reservables.field.verbose_name,  # @UndefinedVariable
         widget=autocomplete_light.ChoiceWidget(
-           'ReservableAutocomplete',
-           widget_attrs={'data-widget-maximum-values': 0}
-        )
+            "ReservableAutocomplete", widget_attrs={"data-widget-maximum-values": 0}
+        ),
     )
     owners = serializers.PrimaryKeyRelatedField(
         many=True,

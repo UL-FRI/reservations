@@ -27,16 +27,15 @@ setuptools.setup(
         exclude=["tests", "tests.*", "*.tests", "*.tests.*"]
     ),
     package_dir={"": "src"},
-    package_data={
-        "reservations": [
-        ]
-    },
+    package_data={"reservations": []},
     python_requires=">=3.10, <3.11",
     install_requires=[
         "Django~=4.1.0",
         "django-guardian~=2.4.0",
         "djangorestframework~=3.14.0",
         "django-filter~=22.1",
+        "django-autocomplete-light>=3.9.4",
+        "autocomplete-light~=1.0.0",
     ],
     extras_require={
         "package": [
@@ -52,10 +51,11 @@ setuptools.setup(
             "setuptools_scm",
             "isort>=5.10.1",
             "django-debug-toolbar",
+            "ipython",
         ],
     },
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production",
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",
@@ -64,7 +64,7 @@ setuptools.setup(
         "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
