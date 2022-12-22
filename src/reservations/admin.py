@@ -8,7 +8,6 @@ from django.contrib import admin
 from django.contrib.auth.models import Permission
 
 from reservations.models import (
-    CustomSortOrder,
     NRequirements,
     NResources,
     Reservable,
@@ -40,5 +39,4 @@ admin.site.register(NResources)
 admin.site.register(ReservableSet)
 admin.site.register(NRequirements)
 admin.site.register(Permission)
-admin.site.register(CustomSortOrder)
 admin.site.register(UserProfile)

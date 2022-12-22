@@ -6,25 +6,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class CustomSortOrder(models.Model):
-    """The model represents users custom sort order.
-
-    TODO: does this makes sense?
-    """
-
-    name = models.CharField(
-        max_length=64,
-        help_text=_("Used to separate between custom sort orders."),
-        verbose_name=_("Name of the custom sort order."),
-    )
-    order = models.TextField(
-        help_text=_(
-            "Comma separated List of reservable ids " "that determines its sort order"
-        ),
-        default="",
-    )
-
-
 class UserProfile(models.Model):
     """The user profile model."""
 
@@ -32,12 +13,6 @@ class UserProfile(models.Model):
         settings.AUTH_USER_MODEL,
         primary_key=True,
         related_name="reservations_profile",
-        on_delete=models.CASCADE,
-    )
-    sort_order = models.ForeignKey(
-        "CustomSortOrder",
-        help_text=_("How reservables should be sorted"),
-        verbose_name=_("Users choosen sort order"),
         on_delete=models.CASCADE,
     )
 
