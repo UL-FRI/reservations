@@ -1,7 +1,8 @@
 """Models for the reservations application."""
 
+from typing import Iterable, Optional
+
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -20,6 +21,7 @@ class UserProfile(models.Model):
 class ReservableSet(models.Model):
     """The set of reservables."""
 
+    #: The name of the set.
     name = models.CharField(
         max_length=255,
         verbose_name=_("ReservableSet name"),
@@ -27,7 +29,11 @@ class ReservableSet(models.Model):
             "ReservableSet model is used to group common reservables together."
         ),
     )
+
+    #: The slug of the reservable set.
     slug = models.SlugField(unique=True)
+
+    #: The reservables in this set.
     reservables = models.ManyToManyField("Reservable", related_name="reservableset_set")
 
     def __str__(self) -> str:
@@ -36,10 +42,15 @@ class ReservableSet(models.Model):
 
 
 class Resource(models.Model):
-    """The model represents a resource a reservable can have."""
+    """The resource a reservable can have."""
 
+    #: The slug of the resource.
     slug = models.SlugField(unique=True)
+
+    # The type of the resource.
     type = models.CharField(max_length=255, help_text=_("The type of the resource."))
+
+    #: The name of the resource.
     name = models.CharField(max_length=255)
 
     def __str__(self) -> str:
@@ -48,22 +59,38 @@ class Resource(models.Model):
 
 
 class NResources(models.Model):
-    """Used to represent the number of resources the reservable has."""
+    """Represent the number of resources the reservable has."""
 
+    #: The resource.
     resource = models.ForeignKey("Resource", on_delete=models.CASCADE)
+
+    #: The reservable.
     reservable = models.ForeignKey("Reservable", on_delete=models.CASCADE)
+
+    #: How many resources the reservable has.
     n = models.IntegerField()
 
     def __str__(self):
+        """Return the human readable representation."""
         return "{0} <= {1} x {2}".format(self.reservable, self.resource, self.n)
 
 
 class Reservable(models.Model):
-    """The model represents a thing one can reserve."""
+    """The reservable object.
 
+    It represents anything we can reserve.
+    """
+
+    #: The reservable slug.
     slug = models.SlugField(unique=True)
+
+    #: The reservable type. It is used to group reservables.
     type = models.CharField(max_length=255)
+
+    #: The reservable name.
     name = models.CharField(max_length=255)
+
+    #: The reservable resources.
     resources = models.ManyToManyField("Resource", through="NResources")
 
     class Meta:
@@ -75,15 +102,20 @@ class Reservable(models.Model):
         verbose_name = _("reservables")
 
     def __str__(self) -> str:
-        """Human readable representation."""
+        """Return human readable representation."""
         return self.slug
 
 
 class NRequirements(models.Model):
     """Model represents a requirement a reservation has."""
 
+    #: The resource the reservation requires.
     resource = models.ForeignKey("Resource", on_delete=models.CASCADE)
+
+    #: The reservation.
     reservation = models.ForeignKey("Reservation", on_delete=models.CASCADE)
+
+    #: How many resources the reservatien requires.
     n = models.IntegerField()
 
 
@@ -95,28 +127,41 @@ class ReservationManager(models.Manager):
         return self.get_query_set().filter(owners=user)
 
     def prune(self):
-        """Delete all reservations."""
-        self.get_queryset().filter(reservables=None).delete()
+        """Delete all reservations without reservables."""
+        self.get_queryset().filter(reservables__isnull=True).delete()
 
 
 class Reservation(models.Model):
     """A model represent a reservation."""
 
+    #: Why the reservation was made.
     reason = models.CharField(
         max_length=255, verbose_name=_("A reason for the reservation.")
     )
+
+    #: Start of the reservation.
     start = models.DateTimeField(verbose_name=_("A start time of the reservation"))
+
+    #: End of the reservation.
     end = models.DateTimeField(verbose_name=_("An end time of the reservation"))
+
+    #: Owners of the reservation.
     owners = models.ManyToManyField(
         settings.AUTH_USER_MODEL, verbose_name=_("The reservation owners")
     )
+
+    #: Reservables in the reservation.
     reservables = models.ManyToManyField("Reservable", verbose_name=_("reservables"))
+
+    #: Requirements for the reservation.
     requirements = models.ManyToManyField(
         "Resource",
         through="NRequirements",
         verbose_name=_("resources"),
         help_text=_("Reservation requirements"),
     )
+
+    # Override the default object manager.
     objects = ReservationManager()
 
     class Meta:
@@ -125,20 +170,18 @@ class Reservation(models.Model):
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_start_before_end",
-                check=models.Q(start__lte=models.F("end")),
+                check=models.Q(start__lt=models.F("end")),
             )
         ]
 
-    def clean(self):
-        """Custom validation."""
-        if self.start >= self.end:
-            raise ValidationError({"start": "Start date must be before the end date."})
+    def overlapping_reservations(
+        self, reservables: Optional[Iterable[Reservable]] = None
+    ) -> models.QuerySet:
+        """Get a queryset of reservations overlapping with this one.
 
-    # Get reservations overlapping in time with the current reservation
-    # reserving some of the given reservables. If reservables is not
-    # given, self.reservables is used.
-    def get_overlapping_reservations(self, reservables=None) -> models.QuerySet:
-        """Get a queryset of reservations overlapping with this one."""
+        When reservables is given only check for reservations containing the given
+        reservables.
+        """
         if reservables is None:
             reservables = self.reservables
         return Reservation.objects.filter(
@@ -146,5 +189,5 @@ class Reservation(models.Model):
         ).exclude(pk=self.pk)
 
     def __str__(self) -> str:
-        """Human readable representation."""
-        return self.reason
+        """Return human readable representation."""
+        return f"{self.start} <-> {self.end}, {self.reason}"
