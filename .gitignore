@@ -1,0 +1,9 @@
+# Python cache
+**/__pycache__
+
+# VS code
+.code-workspace.code-workspace
+launch.json
+
+# Local database
+db.sqlite3
