@@ -34,8 +34,6 @@ setuptools.setup(
         "django-guardian~=2.4.0",
         "djangorestframework~=3.14.0",
         "django-filter~=22.1",
-        "django-autocomplete-light>=3.9.4",
-        "autocomplete-light~=1.0.0",
     ],
     extras_require={
         "package": [
