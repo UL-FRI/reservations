@@ -151,7 +151,9 @@ class Reservation(models.Model):
     )
 
     #: Reservables in the reservation.
-    reservables = models.ManyToManyField("Reservable", verbose_name=_("reservables"))
+    reservables = models.ManyToManyField(
+        "Reservable", verbose_name=_("reservables"), related_name="reservations"
+    )
 
     #: Requirements for the reservation.
     requirements = models.ManyToManyField(
