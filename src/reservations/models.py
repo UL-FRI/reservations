@@ -1,5 +1,6 @@
 """Models for the reservations application."""
 
+from datetime import datetime
 from typing import Iterable, Optional
 
 from django.conf import settings
@@ -51,7 +52,7 @@ class Resource(models.Model):
     type = models.CharField(max_length=255, help_text=_("The type of the resource."))
 
     #: The name of the resource.
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, default="")
 
     def __str__(self) -> str:
         """Return the human readable representation."""
@@ -129,6 +130,12 @@ class ReservationManager(models.Manager):
     def prune(self):
         """Delete all reservations without reservables."""
         self.get_queryset().filter(reservables__isnull=True).delete()
+
+    def overlapping(self, start: datetime, end: datetime, reservables: models.QuerySet):
+        """Return the set of overlapping reservations for reservables."""
+        return Reservation.objects.filter(
+            start__lt=end, end=start, reservables__in=reservables.all()
+        )
 
 
 class Reservation(models.Model):
