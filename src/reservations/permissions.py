@@ -3,121 +3,129 @@
 Used by Django REST framework.
 """
 
+from typing import Optional
+
 from guardian.core import ObjectPermissionChecker
 
+from django.db import models
+
 from rest_framework import exceptions, permissions
+from rest_framework.request import Request
+from rest_framework.views import View
 
 from reservations.models import Reservable, Reservation
 from reservations.serializers import ReservationSerializer
 
 
-class ReservationPermission(permissions.BasePermission):
+class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
+    """Check the permissions when retrieving / modifying objects.
 
-    """
-    Return modified (by user) object or raise exception if serializer
-    data is invalid.
-    Return tupple object, reservables.
-    Return None, None if no object is
+    Both model-level permission and the object-level permission are checked.
+
+    Since the permissions are not checked when creating new models / listing models the
+    additional checks have to be performed on the serializer level (creation) and the
+    permission filter has to be applied (when listing models).
+
+    Since we always allow read-only access the permission filter is actually currently
+    not necessary.
     """
 
-    def get_modified_object(self, request, instance=None):
-        obj, reservables = None, None
-        if len(request.data) != 0:
-            serializer = ReservationSerializer(data=request.data, instance=instance)
-            if serializer.is_valid():
-                reservables = Reservable.objects.filter(
-                    id__in=request.data.getlist("reservables")
+    def can_create_update(
+        self, validated_data, user, reservation: Optional[Reservation]
+    ):
+        """Check if the reservation from the given data can be created.
+
+        :raises PermissionDenied: when reservation can not be created / updated.
+        """
+        reservables = validated_data["reservables"]
+        # Users with manage permission on reservables can always reserve them.
+        if self.check_manage_permissions(reservables, user):
+            return
+
+        self.has_reservables_permissions(reservables, user)
+
+        start = validated_data["start"]
+        end = validated_data["end"]
+        overlapping_reservations = Reservation.objects.overlapping(
+            start, end, reservables
+        )
+        if reservation is not None:
+            # User has to be owner of the existing reservation in order to modify it.
+            if not reservation.owners.filter(pk=user.pk).exists():
+                raise exceptions.PermissionDenied(
+                    _("Must be owner to modify the resevation.")
                 )
-                obj = serializer.object
-        return obj, reservables
 
-    def get_model_instance_from_kwargs(self, kwargs):
-        """
-        Return a Reservation instance if 'pk' in contained in kwargs and
-        there exists a database object with
-        this primary key, None otherwise.
-        """
-        instance = None
-        try:
-            pk = kwargs.get("pk", None)
-            if pk is not None:
-                instance = Reservation.objects.get(pk=pk)
-        finally:
-            return instance
+            # Remove the existing reservation from the overlapping set.
+            overlapping_reservations.exclude(pk=reservation.pk)
 
-    def has_permission(self, request, view):
-        # Allow safe methods for everybody
+        if overlapping_reservations.exists():
+            self.can_overlap(overlapping_reservations, reservables, user)
+
+    def has_object_permission(
+        self, request: Request, view: View, reservation: Reservation
+    ) -> bool:
+        """Does user have reserve permissions on the given reservation."""
+        # Always allow read-only access, even to unauthenticated users.
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Unauthenticated and anonymous users have no acces to
-        # unsafe methods
-        if not (request.user and request.user.is_authenticated):
-            return False
+        # The user must be authenticated at this point or has_permission on the parent
+        # object would fail.
+        serializer = ReservationSerializer(data=request.data, instance=reservation)
+        serializer.is_valid(raise_exception=True)
+        self.can_create_update(serializer.validated_data, request.user, reservation)
+        return True
 
-        if request.method == "POST":
-            obj, reservables = self.get_modified_object(request)
+    def has_reservables_permissions(self, reservables: models.QuerySet, user):
+        """Does user have reserve permissions on all reservables.
 
-            # Always show add form for new objects
-            if obj is None:
-                return True
-            return self.has_reservables_permissions(
-                reservables, request.user
-            ) and self.has_overlapping_permissions(obj, reservables, request.user)
-        else:
-            # For delete and put has_object_permissions will be called
-            return True
+        :raise PermissionDenied: when user has no permission on at least one reservable.
+        """
+        checker = ObjectPermissionChecker(user)
+        if any(
+            not checker.has_perm("manage_reservations", reservable)
+            for reservable in reservables.all()
+        ):
+            raise exceptions.PermissionDenied(
+                detail=_("Insufficient privileges on reservables.")
+            )
 
-    def has_object_permission(self, request, view, obj):
-        # method: GET, PUT, DELETE
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        u = request.user
-        if not u:
-            raise exceptions.PermissionDenied(detail=_("Please login"))
-
-        instance = Reservation.objects.get(pk=obj.pk)
-        modified_obj, reservables = self.get_modified_object(request, instance)
-        if modified_obj is None:
-            modified_obj = obj
-            reservables = obj.reservables
-
-        # Users with manage permission on reservables can do anything
-        if self.has_manage_permissions(reservables, u):
-            return True
-
-        return (
-            u in obj.owners.all()
-            and self.has_reservables_permissions(reservables, u)
-            and self.has_overlapping_permissions(modified_obj, reservables, u)
+    def check_manage_permissions(self, reservables: models.QuerySet, user) -> bool:
+        """Does user have manage permissions on all reservables."""
+        checker = ObjectPermissionChecker(user)
+        return all(
+            checker.has_perm("manage_reservations", reservable)
+            for reservable in reservables.all()
         )
 
-    def has_reservables_permissions(self, reservables, user):
-        checker = ObjectPermissionChecker(user)
-        for r in reservables.all():
-            if not checker.has_perm("reserve", r):
-                raise exceptions.PermissionDenied(detail=_("Insufficient privileges"))
-        return True
+    def can_overlap(
+        self,
+        overlapping_reservations: models.QuerySet,
+        reservables: models.QuerySet,
+        user,
+    ):
+        """
+        Check if user can create the given revervation.
 
-    def has_manage_permissions(self, reservables, user):
-        checker = ObjectPermissionChecker(user)
-        for r in reservables.all():
-            if not checker.has_perm("manage_reservations", r):
-                return False
-        return True
+        In case the new reservation is overlapping with existing ones check that the
+        user has permission to create overlapping reservations.
 
-    def has_overlapping_permissions(self, reservation, reservables, user):
-        # do NOT use method on reservation object! It checks
-        # object.reservations which does not exist when called from
-        # method has_permission.
-        overlapping = reservation.overlapping_reservations(reservables)
+        :raises PermissionDenied: when the reservation would overlap with existing ones
+            on reservables user has no 'double_reserve' permission on.
+        """
         checker = ObjectPermissionChecker(user)
-        for res in overlapping:
-            for r in res.reservables.all():
-                if r in (
-                    reservables.all() and not checker.has_perm("double_reserve", r)
-                ):
-                    raise exceptions.PermissionDenied(
-                        detail=_("Double booking not allowed")
-                    )
-        return True
+        # We have to check the reservables that are contained in the intersection of
+        # the overlapping reservations and given reservables.
+        reservables_to_check = (
+            Reservable.objects.filter(reservation__in=overlapping_reservations)
+            .filter(pk__in=reservables.values("pk"))
+            .distinct()
+        )
+
+        # The iterator is used to not construct all the reservable objects.
+        if any(
+            not checker.has_perm("double_reserve", reservable)
+            for reservable in reservables_to_check.iterator()
+        ):
+            raise exceptions.PermissionDenied(detail=_("No double booking permission."))

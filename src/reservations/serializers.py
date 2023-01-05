@@ -40,8 +40,7 @@ class ReservableSetSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ReservationSerializer(serializers.HyperlinkedModelSerializer):
-    reservables = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    owners = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    """Serializer for the Reservation model."""
 
     class Meta:
         model = Reservation

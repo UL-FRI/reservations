@@ -69,3 +69,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
     permission_classes = (ReservationPermission,)
     filterset_class = ReservationFilter
     serializer_class = ReservationSerializer
+
+    def perform_create(self, serializer: serializers.Serializer):
+        """Perform additional permission checks.
+
+        The has_object_permission is not called when creating objects so we have to
+        perform the necessary permission checks here.
+
+        :raises PermissionDenied: if user has no permission to create the reservation.
+        """
+        ReservationPermission().can_create_update(
+            serializer.validated_data, self.request.user
+        )
+        return super().perform_create(serializer)
