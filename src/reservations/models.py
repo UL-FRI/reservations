@@ -179,7 +179,7 @@ class Reservation(models.Model):
     ) -> models.QuerySet:
         """Get a queryset of reservations overlapping with this one.
 
-        When reservables is given only check for reservations containing the given
+        When reservables are given only check for reservations containing the given
         reservables.
         """
         if reservables is None:
