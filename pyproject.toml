@@ -35,6 +35,7 @@ dependencies = [
     "django-filter~=25.2",
     "django-autocomplete-light~=3.12.1",
     "django-debug-toolbar~=6.1.0",
+    "crispy-bootstrap5>=2025.6",
 ]
 
 [project.optional-dependencies]

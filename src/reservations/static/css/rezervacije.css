@@ -1,0 +1,68 @@
+:root {
+    --red-primary: #e03127;
+    --red-secondary: #8e201c;
+    --black-primary: #212529;
+    --black-secondary: #343a40;
+    --grey-primary: #6c757d;
+    --grey-secondary: #adb5bd;
+    --grey-light: #f8f9fa;
+
+    --bs-primary-rgb: 224,49,39;
+}
+
+html, body {
+    min-height: 100vh;
+}
+
+footer {
+    background-color: var(--black-primary) !important;
+}
+
+/*
+    TIMELINE VIEW
+*/
+
+#date-picker-container {
+    display: flex;
+    align-items: center;
+}
+
+#date-picker-container label {
+    margin-right: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: white;
+}
+
+.reservation-form-container {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.reservation-form-container.loading {
+    opacity: .5;
+    pointer-events: none;
+}
+
+#timeline-container {
+    width: 100%;
+}
+.vis-label, .vis-item.vis-range {
+    font-size: .8rem;
+}
+.vis-item-overflow {
+    display: flex;
+    align-items: center;
+}
+.vis-item.vis-range {
+    background-color: rgba(var(--bs-primary-rgb), 1);
+    color: white;
+    cursor: pointer;
+    border: none !important;
+    border-radius: 0 !important;
+}
+.vis-item.vis-selected, .vis-item.vis-range:hover {
+    filter: brightness(.8) contrast(1.2);
+}
+.vis-group:hover, .vis-label {
+    background-color: rgba(var(--bs-secondary-rgb), 0.1);
+}

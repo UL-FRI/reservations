@@ -1,0 +1,29 @@
+{% extends 'reservations/base.html' %}
+{% load static %}
+{% block title %}FRIzervacije{% endblock %}
+
+{% block contained %}
+<div class="container text-center">
+    <h1>Welcome to FRIzervacije!</h1>
+    <p>
+        These are the ReservableSets on this instance:
+    </p>
+
+    {% for reservableset in object_list %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h2 class="card-title">{{ reservableset.name }}</h2>
+                <div>
+                    {% for reservable_type in reservableset.types %}
+                        <a href="timeline/{{reservableset.slug}}/{{reservable_type}}" class="badge fs-5 bg-secondary">{{ reservable_type }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}

@@ -1,10 +1,17 @@
 """Reservation application views."""
 
 from heapq import *
+from typing import override
 
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from rest_framework import permissions, serializers, viewsets
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.list import ListView
+from reservations.forms import ReservationForm
+from rest_framework import serializers, viewsets
+from django.contrib import messages
 
 from reservations.filters import (
     NResourcesFilter,
@@ -28,6 +35,8 @@ from reservations.serializers import (
     ReservationSerializer,
     ResourceSerializer,
 )
+
+from guardian.mixins import PermissionRequiredMixin
 
 
 class ReservableViewSet(viewsets.ModelViewSet):
@@ -65,7 +74,7 @@ class NResourcesViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     """Reservation view set."""
 
-    queryset = Reservation.objects.all()
+    queryset = Reservation.objects.all().prefetch_related("reservables", "requirements").distinct()
     permission_classes = (ReservationPermission,)
     filterset_class = ReservationFilter
     serializer_class = ReservationSerializer
@@ -82,3 +91,57 @@ class ReservationViewSet(viewsets.ModelViewSet):
             serializer.validated_data, self.request.user
         )
         return super().perform_create(serializer)
+
+
+class TimelineView(TemplateView):
+    template_name = "reservations/timeline.html"
+
+
+class HomeView(ListView):
+    model = ReservableSet
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        for rs in context['object_list']:
+            rs.types = set(rs.reservables.values_list('type', flat=True))
+        return context
+
+class GiveFormRequestMixin:
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+# Permission are shared between the create and update views, so they're implemented in the form. This also leads to nicer error messages.
+
+class ReservationCreateView(GiveFormRequestMixin, CreateView):
+    model = Reservation
+    form_class = ReservationForm
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Reservation created successfully.')
+        return super().form_valid(form)
+
+    @override
+    def get_success_url(self):
+        return reverse('reservation_update', kwargs=dict(pk=self.object.pk, **self.kwargs))
+
+    def get_initial(self):
+        initial = super().get_initial()
+        for key, value in self.request.GET.items():
+            initial[key] = value
+        initial["owners"] = [self.request.user]
+        return initial
+
+
+class ReservationUpdateView(GiveFormRequestMixin, UpdateView):
+    model = Reservation
+    form_class = ReservationForm
+
+    @override
+    def get_success_url(self):
+        return self.request.path
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Reservation updated successfully.')
+        return super().form_valid(form)

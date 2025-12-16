@@ -139,6 +139,8 @@ class ReservationFilter(BaseFilter):
             "owners__email": TEXT_LOOKUPS,
             "reservables__name": TEXT_LOOKUPS,
             "reservables__slug": SLUG_LOOKUPS,
+            "reservables__type": SLUG_LOOKUPS,
+            "reservables__reservableset_set__slug": SLUG_LOOKUPS,
             "id": NUMBER_LOOKUPS[:],
         }
 

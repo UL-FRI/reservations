@@ -9,6 +9,10 @@ from reservations.views import (  # MyReservationsViewSet,
     ReservableViewSet,
     ReservationViewSet,
     ResourceViewSet,
+    HomeView,
+    TimelineView,
+    ReservationCreateView,
+    ReservationUpdateView
 )
 
 router = routers.DefaultRouter()
@@ -27,6 +31,12 @@ router.register(
 
 
 urlpatterns = [
+    path("", HomeView.as_view()),
+    path("timeline/<str:reservable_set_slug>/<str:reservable_type_slug>", TimelineView.as_view(), name="timeline"),
+
+    path("reservations/create", ReservationCreateView.as_view(), name="reservation_create"),
+    path("reservations/<int:pk>/", ReservationUpdateView.as_view(), name="reservation_update"),
+
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
     path("", include("django.contrib.auth.urls")),

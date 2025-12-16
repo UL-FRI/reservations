@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "crispy_forms",
+    "crispy_bootstrap5",
     "guardian",
     "reservations",
     "django_filters",
@@ -139,3 +141,6 @@ REST_FRAMEWORK = {
 
 # Used for Django Debug Toolbar.
 INTERNAL_IPS = ["127.0.0.1"]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

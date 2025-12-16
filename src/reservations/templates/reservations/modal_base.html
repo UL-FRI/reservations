@@ -1,0 +1,15 @@
+{% block pre_css %}{% endblock %}
+{% block extra_css %}{% endblock %}
+{% block messages %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+{% block content %}
+    {% block contained %}{% endblock %}
+{% endblock %}
+{% block extra_js %}{% endblock %}

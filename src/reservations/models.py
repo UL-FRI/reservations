@@ -41,6 +41,10 @@ class ReservableSet(models.Model):
         """Return the human readable representation."""
         return self.name
 
+    def reservable_types(self) -> Iterable[str]:
+        """Return the types of reservables in this set."""
+        return set(self.reservables.values_list("type", flat=True))
+
 
 class Resource(models.Model):
     """The resource a reservable can have."""
