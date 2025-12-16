@@ -75,6 +75,10 @@ class NResources(models.Model):
         """Return the human readable representation."""
         return "{0} <= {1} x {2}".format(self.reservable, self.resource, self.n)
 
+    class Meta:
+        verbose_name = _("countable resource")
+        verbose_name_plural = _("countable resources")
+
 
 class Reservable(models.Model):
     """The reservable object.
@@ -100,7 +104,8 @@ class Reservable(models.Model):
             ("double_reserve", "Create an overlapping reservation"),
             ("manage_reservations", "Manage reservations using this reservable"),
         )
-        verbose_name = _("reservables")
+        verbose_name = _("reservable")
+        verbose_name_plural = _("reservables")
 
     def __str__(self) -> str:
         """Return human readable representation."""
@@ -118,6 +123,13 @@ class NRequirements(models.Model):
 
     #: How many resources the reservatien requires.
     n = models.IntegerField()
+
+    class Meta:
+        verbose_name = _("countable requirement")
+        verbose_name_plural = _("countable requirements")
+
+    def __str__(self) -> str:
+        return f"{self.resource} x {self.n}"
 
 
 class ReservationManager(models.Manager):
@@ -175,13 +187,14 @@ class Reservation(models.Model):
 
     class Meta:
         """Add constraints to the database."""
-
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_start_before_end",
                 check=models.Q(start__lt=models.F("end")),
             )
         ]
+        verbose_name = _("reservation")
+        verbose_name_plural = _("reservations")
 
     def overlapping_reservations(
         self, reservables: Optional[Iterable[Reservable]] = None

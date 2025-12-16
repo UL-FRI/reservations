@@ -31,7 +31,7 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
     """
 
     def can_create_update(
-        self, validated_data, user, reservation: Optional[Reservation]
+        self, validated_data, user, reservation: Optional[Reservation] = None
     ):
         """Check if the reservation from the given data can be created.
 
