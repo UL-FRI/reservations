@@ -2,6 +2,7 @@
 
 from heapq import *
 from typing import override
+from django.views.generic.base import RedirectView
 
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -37,6 +38,7 @@ from reservations.serializers import (
 )
 
 from guardian.mixins import PermissionRequiredMixin
+from urllib.parse import urlencode
 
 
 class ReservableViewSet(viewsets.ModelViewSet):
@@ -46,6 +48,10 @@ class ReservableViewSet(viewsets.ModelViewSet):
     filterset_class = ReservableFilter
     queryset = Reservable.objects.all()
 
+class OldReservableViewSet(ReservableViewSet):
+    """For compatibility with the old version of reservations"""
+    def get_queryset(self):
+        return super().get_queryset().filter(reservableset_set__slug=self.kwargs['reservable_set_slug'], type=self.kwargs['reservable_type'])
 
 class ResourceViewSet(viewsets.ModelViewSet):
     """The resource viewset."""
@@ -91,6 +97,18 @@ class ReservationViewSet(viewsets.ModelViewSet):
             serializer.validated_data, self.request.user
         )
         return super().perform_create(serializer)
+
+class OldReservationViewSet(RedirectView):
+    """For compatibility with the old version of reservations"""
+
+    def get_redirect_url(self, *args, **kwargs):
+        query_params = dict(self.request.GET)
+        if 'start' in query_params:
+            query_params['start__gt'] = query_params.pop('start')
+        if 'end' in query_params:
+            query_params['end__lt'] = query_params.pop('end')
+        query_string = urlencode(query_params)
+        return f"/api/reservations?{query_string}"
 
 
 class TimelineView(TemplateView):

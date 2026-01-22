@@ -1,27 +1,23 @@
-"""
-Django settings for local development and testing.
-"""
-
+import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
 
-# Quick-start development settings - unsuitable for produceion
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+ENVIRONMENT = env.str("ENVIRONMENT", default="development")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-i+@5&9gvi7a8j^_5qm4rfzlb^s-&7iof*v!y$x=cv3x3q-06%2"
+if "prod" not in ENVIRONMENT:
+    SECRET_KEY = "django-insecure-i+@5&9gvi7a8j^_5qm4rfzlb^s-&7iof*v!y$x=cv3x3q-06%2"
+else:
+    SECRET_KEY = env.str("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default="True" if "dev" in ENVIRONMENT else "False")
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="*" if DEBUG else "").split(",")
 
 # Application definition
-
 INSTALLED_APPS = [
     "dal",
     "dal_select2",
@@ -51,12 +47,14 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "tests.urls"
+ROOT_URLCONF = "reservations_site.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR / "reservations_site/templates"
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -69,17 +67,14 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "tests.wsgi.application"
+WSGI_APPLICATION = "reservations_site.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3")
 }
 
 
@@ -107,7 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = env.str("TIME_ZONE", default="Europe/Ljubljana")
 
 USE_I18N = True
 
@@ -118,6 +113,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = env.str("STATIC_ROOT", default=str(BASE_DIR / "staticfiles"))
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = env.str("MEDIA_ROOT", default=str(BASE_DIR / "media"))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
