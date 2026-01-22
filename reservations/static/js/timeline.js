@@ -75,7 +75,7 @@ function initTimeline() {
 function eventSource({startStr,endStr}, successCallback, failureCallback) {
     fetchEventsInRange(startStr, endStr)
         .then(data => {
-            const events = data.map(reservation => {
+            const events = data.results.map(reservation => {
                 return {
                     id: reservation.id,
                     content: reservation.reason,
@@ -96,7 +96,7 @@ function eventSource({startStr,endStr}, successCallback, failureCallback) {
 function loadReservables() {
     fetchReservables()
         .then(data => {
-            const resources = data.map(reservable => {
+            const resources = data.results.map(reservable => {
                 return {
                     id: reservable.url,
                     content: reservable.name,
