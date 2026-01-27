@@ -7,15 +7,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 
 ENVIRONMENT = env.str("ENVIRONMENT", default="development")
+IS_DEV = "dev" in ENVIRONMENT
 
 if "prod" not in ENVIRONMENT:
     SECRET_KEY = "django-insecure-i+@5&9gvi7a8j^_5qm4rfzlb^s-&7iof*v!y$x=cv3x3q-06%2"
 else:
     SECRET_KEY = env.str("SECRET_KEY")
 
-DEBUG = env.bool("DEBUG", default="True" if "dev" in ENVIRONMENT else "False")
+DEBUG = env.bool("DEBUG", default=IS_DEV)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="*" if DEBUG else "").split(",")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"] if DEBUG else [])
 
 # Application definition
 INSTALLED_APPS = [
@@ -74,7 +75,7 @@ WSGI_APPLICATION = "reservations_site.wsgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3")
+    "default": env.db("DATABASE_URL", default=env.db_url_config("sqlite:///db.sqlite3"))
 }
 
 
