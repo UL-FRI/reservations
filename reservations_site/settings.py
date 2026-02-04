@@ -75,7 +75,7 @@ WSGI_APPLICATION = "reservations_site.wsgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db("DATABASE_URL", default=env.db_url_config("sqlite:///db.sqlite3"))
+    "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3")
 }
 
 
