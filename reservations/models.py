@@ -1,5 +1,6 @@
 """Models for the reservations application."""
 
+import logging
 from datetime import datetime
 from typing import Iterable, Optional
 
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+logger = logging.getLogger(__name__)
 
 class UserProfile(models.Model):
     """The user profile model."""
@@ -141,7 +143,7 @@ class ReservationManager(models.Manager):
 
     def owned_by_user(self, user) -> models.QuerySet:
         """Get the queryset of reservations (co)owned by the given user."""
-        return self.get_query_set().filter(owners=user)
+        return self.get_queryset().filter(owners=user)
 
     def prune(self):
         """Delete all reservations without reservables."""
@@ -156,6 +158,16 @@ class ReservationManager(models.Manager):
 
 class Reservation(models.Model):
     """A model represent a reservation."""
+
+    #: External ID from an external reservation system (e.g. import source).
+    external_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name=_("External reservation ID"),
+        help_text=_("ID from external reservation system"),
+    )
 
     #: Why the reservation was made.
     reason = models.CharField(

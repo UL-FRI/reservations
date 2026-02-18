@@ -1375,6 +1375,7 @@ dependencies = [
     { name = "django-guardian" },
     { name = "djangorestframework" },
     { name = "psycopg" },
+    { name = "requests" },
 ]
 
 [package.dev-dependencies]
@@ -1399,6 +1400,7 @@ requires-dist = [
     { name = "django-guardian", specifier = "~=3.2.0" },
     { name = "djangorestframework", specifier = "~=3.16.1" },
     { name = "psycopg", specifier = ">=3.2.12" },
+    { name = "requests", specifier = "~=2.32.0" },
 ]
 
 [package.metadata.requires-dev]
