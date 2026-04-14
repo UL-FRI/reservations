@@ -7,6 +7,7 @@
     --grey-secondary: #adb5bd;
     --grey-light: #f8f9fa;
 
+    --bs-font-sans-serif: "Univerza Sans", system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
     --bs-primary-rgb: 224,49,39;
 }
 
@@ -65,4 +66,58 @@ footer {
 }
 .vis-group:hover, .vis-label {
     background-color: rgba(var(--bs-secondary-rgb), 0.1);
+}
+
+
+
+/*
+    UNIVERZA SANS FONT
+*/
+
+@font-face {
+    font-family: 'Univerza Sans';
+    src: url('../fonts/unisans/UniverzaSans-Light.woff2') format('woff2'), url('../fonts/unisans/UniverzaSans-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Univerza Sans';
+    src: url('../fonts/unisans/UniverzaSans-LightItalic.woff2') format('woff2'), url('../fonts/unisans/UniverzaSans-LightItalic.woff') format('woff');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Univerza Sans';
+    src: url('../fonts/unisans/UniverzaSans-Regular.woff2') format('woff2'), url('../fonts/unisans/UniverzaSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Univerza Sans';
+    src: url('../fonts/unisans/UniverzaSans-RegularItalic.woff2') format('woff2'), url('../fonts/unisans/UniverzaSans-RegularItalic.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Univerza Sans';
+    src: url('../fonts/unisans/UniverzaSans-Medium.woff2') format('woff2'), url('../fonts/unisans/UniverzaSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Univerza Sans';
+    src: url('../fonts/unisans/UniverzaSans-MediumItalic.woff2') format('woff2'), url('../fonts/unisans/UniverzaSans-MediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap
 }
