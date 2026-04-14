@@ -19,5 +19,6 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("reservations.urls")),
+    path('', include('social_django.urls', namespace='social')),
     path("__debug__/", include("debug_toolbar.urls")),
 ]
