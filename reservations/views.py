@@ -1,44 +1,37 @@
 """Reservation application views."""
 
-from heapq import *
-from typing import override
-from django.views.generic.base import RedirectView
+from typing import Optional, override
+from urllib.parse import urlencode
 
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.http.request import HttpRequest
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-
-from django.views.generic.base import TemplateView
+from django.views.generic.base import RedirectView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
-from reservations.forms import ReservationForm
-from rest_framework import serializers, viewsets
-from django.contrib import messages
-
-from reservations.filters import (
-    NResourcesFilter,
-    ReservableFilter,
-    ReservableSetFilter,
-    ReservationFilter,
-    ResourceFilter,
-)
-from reservations.models import (
-    NResources,
-    Reservable,
-    ReservableSet,
-    Reservation,
-    Resource,
-)
-from reservations.permissions import ReservationPermission
-from reservations.serializers import (
-    ReservableNResourcesSerializer,
-    ReservableSerializer,
-    ReservableSetSerializer,
-    ReservationSerializer,
-    ResourceSerializer,
-)
-
 from guardian.mixins import PermissionRequiredMixin
-from urllib.parse import urlencode
+from reservations.filters import (NResourcesFilter, ReservableFilter,
+                                  ReservableSetFilter, ReservationFilter,
+                                  ResourceFilter)
+from reservations.forms import ReservationForm
+from reservations.models import (NResources, Reservable, ReservableSet,
+                                 Reservation, Resource)
+from reservations.permissions import ReservationPermission
+from reservations.serializers import (ReservableNResourcesSerializer,
+                                      ReservableSerializer,
+                                      ReservableSetSerializer,
+                                      ReservationSerializer,
+                                      ResourceSerializer, UserSerializer)
+from rest_framework import serializers, viewsets
+from rest_framework.permissions import SAFE_METHODS
+
+
+class UserViewSet(viewsets.ModelViewSet):
+	serializer_class = UserSerializer
+	queryset = User.objects.all()	
 
 
 class ReservableViewSet(viewsets.ModelViewSet):
@@ -146,15 +139,23 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
 
     def get_initial(self):
         initial = super().get_initial()
+        # Copy initial valued from GET parameters (for embedded create form)
         for key, value in self.request.GET.items():
             initial[key] = value
+        # Set the initial owners to the current user
         initial["owners"] = [self.request.user]
         return initial
 
 
-class ReservationUpdateView(GiveFormRequestMixin, UpdateView):
+class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, UpdateView):
     model = Reservation
     form_class = ReservationForm
+    
+    
+    def get_required_permissions(self, request: Optional[HttpRequest] = None) -> list[str]:
+        if request.method in SAFE_METHODS:
+            return []
+        return ['reservations.change_reservation']
 
     @override
     def get_success_url(self):
@@ -163,3 +164,10 @@ class ReservationUpdateView(GiveFormRequestMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Reservation updated successfully.')
         return super().form_valid(form)
+
+def login_redirect(request):
+    # If OIDC is configured, redirect to the OIDC login page
+    if hasattr(settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT"):
+        return RedirectView.as_view(url=reverse('social:begin', kwargs={'backend': 'oidc'}))(request)
+    # Otherwise, use the admin login page
+    return RedirectView.as_view(url=reverse('auth:login'))(request)

@@ -1,17 +1,17 @@
 """Serializers for REST."""
 
+from django.contrib.auth.models import User
+from reservations.models import (NResources, Reservable, ReservableSet,
+                                 Reservation, Resource)
 from rest_framework import serializers
 
-from reservations.models import (
-    NResources,
-    Reservable,
-    ReservableSet,
-    Reservation,
-    Resource,
-)
 
+class UserSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = User
+		fields = ("id", "first_name", "last_name", "url")
 
-class ResourceSerializer(serializers.HyperlinkedModelSerializer):
+class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = "__all__"
@@ -25,7 +25,7 @@ class ReservableNResourcesSerializer(serializers.ModelSerializer):
         fields = ("id", "resource", "n", "url")
 
 
-class ReservableSerializer(serializers.HyperlinkedModelSerializer):
+class ReservableSerializer(serializers.ModelSerializer):
     nresources_set = ReservableNResourcesSerializer(many=True, read_only=True)
 
     class Meta:
@@ -33,14 +33,15 @@ class ReservableSerializer(serializers.HyperlinkedModelSerializer):
         fields = ("id", "slug", "type", "name", "nresources_set", "url")
 
 
-class ReservableSetSerializer(serializers.HyperlinkedModelSerializer):
+class ReservableSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReservableSet
         fields = ("name", "slug", "reservables", "url")
 
 
-class ReservationSerializer(serializers.HyperlinkedModelSerializer):
+class ReservationSerializer(serializers.ModelSerializer):
     """Serializer for the Reservation model."""
+    owners = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Reservation

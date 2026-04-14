@@ -1,58 +1,36 @@
-"""
-Created on Jun 17, 2014
-
-@author: gregor
-"""
-
-from autocomplete_light import shortcuts as al
-from guardian.shortcuts import get_objects_for_user
-
-from django.conf import settings
+from dal import autocomplete
 from django.contrib.auth import get_user_model
-
-from reservations.models import Reservable, Reservation
-
-#
-# autocomplete_light.register(Reservable,
-#     search_fields=['name',],
-#     attrs={
-#         'placeholder': 'Other model name ?',
-#         'data-autocomplete-minimum-characters': 1,
-#     },
-#     widget_attrs={
-#         'data-widget-maximum-values': 40,
-#         'class': 'modern-style',
-#     },
-# )
+from django.db import models
+from guardian.shortcuts import get_objects_for_user
+from reservations.models import Reservable
 
 
-class ReservableAutocomplete(al.AutocompleteModelBase):
-    search_fields = ["slug", "name"]
-    model = Reservable
-    widget_attrs = {"data-widget-maximum-values": 30}
+class ReservableAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Reservable.objects.all()
 
-    def choices_for_request(self):
-        if not self.request.user.is_staff:
-            self.choices = get_objects_for_user(
-                self.request.user, "reserve", self.choices
+        # Only retrieve reservables user can see
+        qs = get_objects_for_user(self.request.user, "reserve", qs)
+
+        if self.q:
+            qs = qs.filter(models.Q(name__icontains=self.q) | models.Q(slug__icontains=self.q))
+        return qs
+
+    def get_result_label(self, result):
+        return "{0} ({1})".format(result.slug, result.type)
+
+
+class UserAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = get_user_model().objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                models.Q(first_name__icontains=self.q)
+                | models.Q(last_name__icontains=self.q)
+                | models.Q(username__icontains=self.q)
             )
-            # Only retrieve reservables user can see
-        return super(ReservableAutocomplete, self).choices_for_request()
+        return qs
 
-    def choice_label(self, choice):
-        return "{0} ({1})".format(choice.slug, choice.type)
-
-
-al.register(Reservable, ReservableAutocomplete)
-
-
-class UserAutocomplete(al.AutocompleteModelBase):
-    search_fields = ["first_name", "last_name", "username"]
-    model = get_user_model()
-    widget_attrs = {"data-widget-maximum-values": 30}
-
-    def choice_label(self, choice):
-        return "{0} {1}".format(choice.first_name, choice.last_name)
-
-
-al.register(get_user_model(), UserAutocomplete)
+    def get_result_label(self, result):
+        return "{0} {1}".format(result.first_name, result.last_name)

@@ -35,8 +35,8 @@ function initTimeline() {
         zoomMax: 1000 * 60 * 60 * 24 * 7,
 
         zoomKey: 'ctrlKey',
-        horizontalScroll: false,
-        horizontalScrollKey: 'shiftKey',
+        horizontalScroll: true,
+        // horizontalScrollKey: 'shiftKey',
 
         // Design stuff
         margin: {
@@ -98,7 +98,7 @@ function loadReservables() {
         .then(data => {
             const resources = data.results.map(reservable => {
                 return {
-                    id: reservable.url,
+                    id: reservable.id,
                     content: reservable.name,
                 };
             });
@@ -132,6 +132,29 @@ function hijackForms(formContainer) {
     });
 }
 
+// Source - https://stackoverflow.com/a/47614491
+// Posted by allenhwkim, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-04-02, License - CC BY-SA 4.0
+
+function setInnerHTML(elm, html) {
+  elm.innerHTML = html;
+  
+  Array.from(elm.querySelectorAll("script"))
+    .forEach( oldScriptEl => {
+      const newScriptEl = document.createElement("script");
+      
+      Array.from(oldScriptEl.attributes).forEach( attr => {
+        newScriptEl.setAttribute(attr.name, attr.value) 
+      });
+      
+      const scriptText = document.createTextNode(oldScriptEl.innerHTML);
+      newScriptEl.appendChild(scriptText);
+      
+      oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
+  });
+}
+
+
 function openForm(formUrl) {
 
   // Show modal
@@ -152,7 +175,7 @@ function openForm(formUrl) {
             }
         }).then(async resp1 => {
             // Insert form HTML into modal
-            $formContainer.innerHTML = await resp1.text();
+            setInnerHTML($formContainer, await resp1.text());
             hijackForms($formContainer);
         })
         .catch(error => {

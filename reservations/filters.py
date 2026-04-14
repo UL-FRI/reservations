@@ -1,14 +1,8 @@
 """Filters for REST ViewSets in views namespace."""
 
 from django_filters import rest_framework as filters
-
-from reservations.models import (
-    NResources,
-    Reservable,
-    ReservableSet,
-    Reservation,
-    Resource,
-)
+from reservations.models import (NResources, Reservable, ReservableSet,
+                                 Reservation, Resource)
 
 # Base lookup types.
 NUMBER_LOOKUPS = [

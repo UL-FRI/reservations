@@ -1,12 +1,13 @@
 from datetime import datetime
-from crispy_forms.layout import Column, Fieldset, Layout, Row, Submit
-from dal.autocomplete import ModelSelect2Multiple
-from django import forms
-from django.core.exceptions import PermissionDenied
-from reservations.models import Reservable, Reservation
 
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Column, Field, Fieldset, Layout, Row, Submit
+from dal.autocomplete import ModelSelect2Multiple
+from django import forms
+from django.contrib.auth.models import User
+from reservations.models import Reservable, Reservation
 from reservations.permissions import ReservationPermission
+from rest_framework.exceptions import PermissionDenied
 
 
 class FormWithRequestMixin:
@@ -33,17 +34,17 @@ class ActuallyWorkingDateTimeField(forms.DateTimeField):
 class ReservationForm(FormWithRequestMixin, forms.ModelForm):
     start = ActuallyWorkingDateTimeField(label='Start Time')
     end = ActuallyWorkingDateTimeField(label='End Time')
-    # owners = forms.ModelMultipleChoiceField(
-    #         queryset=None,
-    #         widget=al.widgets.ModelSelect2Multiple(
-    #             url='/autocomplete/user/',
-    #             attrs={
-    #                 'data-placeholder': 'Search for users...',
-    #                 'data-minimum-input-length': 1,
-    #             },
-    #         ),
-    #         required=False
-    #     )
+    owners = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=ModelSelect2Multiple(
+            url='/autocomplete/user/',
+            attrs={
+                'data-placeholder': 'Search for users...',
+                'data-minimum-input-length': 1,
+            },
+        ),
+        required=True
+    )
     reservables = forms.ModelMultipleChoiceField(
         queryset=Reservable.objects.all(),
         widget=ModelSelect2Multiple(
@@ -53,7 +54,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
                 'data-minimum-input-length': 1,
             },
         ),
-        required=False
+        required=True
     )
 
     def __init__(self, *args, **kwargs):
@@ -61,7 +62,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_action = self.request.path
         self.helper.layout = Layout(
-            "reason",
+            Field("reason", autofocus=1),
             Row(
                 Column("start"),
                 Column("end"),
@@ -70,18 +71,24 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
             "reservables",
             Submit('submit', 'Submit')
         )
+    
 
     def clean(self):
         cleaned_data = super().clean()
+        
+        # Check end > start
         start = cleaned_data.get('start')
         end = cleaned_data.get('end')
         if start and end and start > end:
             self.add_error('end', 'End time must be after start time.')
 
+        # Run permission checks and turn permission errors into form error for display
         try:
             ReservationPermission().can_create_update(cleaned_data, self.request.user)
         except PermissionDenied as e:
             self.add_error(None, str(e))
+        
+        return cleaned_data
 
 
     class Meta:

@@ -2,23 +2,16 @@
 Register models in Django admin.
 """
 
-from django.contrib.admin.widgets import FilteredSelectMultiple, RelatedFieldWidgetWrapper
+from django.contrib import admin
+from django.contrib.admin.widgets import (FilteredSelectMultiple,
+                                          RelatedFieldWidgetWrapper)
+from django.contrib.auth.models import Permission
 from django.db.models.fields.related import ManyToManyField
 from django.db.models.fields.reverse_related import ManyToManyRel
 from guardian.admin import GuardedModelAdmin
-
-from django.contrib import admin
-from django.contrib.auth.models import Permission
-
-from reservations.models import (
-    NRequirements,
-    NResources,
-    Reservable,
-    ReservableSet,
-    Reservation,
-    Resource,
-    UserProfile,
-)
+from reservations.models import (NRequirements, NResources, Reservable,
+                                 ReservableSet, Reservation, Resource,
+                                 UserProfile)
 
 
 class StudentAdmin(admin.ModelAdmin):
@@ -29,12 +22,12 @@ class ReservationAdmin(GuardedModelAdmin):
     search_fields = ("reason",)
 
 
-class ReservableAdmin(admin.ModelAdmin):
+class ReservableAdmin(GuardedModelAdmin):
     list_display = ("name", "type")
     list_filter = ("type", "reservableset_set")
 
 
-class ReservableSetAdmin(admin.ModelAdmin):
+class ReservableSetAdmin(GuardedModelAdmin):
     filter_horizontal = ('reservables',)
 
 

@@ -5,16 +5,15 @@ Used by Django REST framework.
 
 from typing import Optional
 
-from guardian.core import ObjectPermissionChecker
-
 from django.db import models
-
+from django.utils.translation import gettext_lazy as _
+from guardian.core import ObjectPermissionChecker
+from reservations.models import Reservable, Reservation
+from reservations.serializers import ReservationSerializer
+from reservations.util import ListWithAll
 from rest_framework import exceptions, permissions
 from rest_framework.request import Request
 from rest_framework.views import View
-
-from reservations.models import Reservable, Reservation
-from reservations.serializers import ReservationSerializer
 
 
 class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
@@ -37,7 +36,7 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
 
         :raises PermissionDenied: when reservation can not be created / updated.
         """
-        reservables = validated_data["reservables"]
+        reservables = ListWithAll(validated_data["reservables"])
         # Users with manage permission on reservables can always reserve them.
         if self.check_manage_permissions(reservables, user):
             return
@@ -77,7 +76,7 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
         self.can_create_update(serializer.validated_data, request.user, reservation)
         return True
 
-    def has_reservables_permissions(self, reservables: models.QuerySet, user):
+    def has_reservables_permissions(self, reservables: models.QuerySet | ListWithAll, user):
         """Does user have reserve permissions on all reservables.
 
         :raise PermissionDenied: when user has no permission on at least one reservable.
@@ -91,7 +90,7 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
                 detail=_("Insufficient privileges on reservables.")
             )
 
-    def check_manage_permissions(self, reservables: models.QuerySet, user) -> bool:
+    def check_manage_permissions(self, reservables: models.QuerySet | ListWithAll, user) -> bool:
         """Does user have manage permissions on all reservables."""
         checker = ObjectPermissionChecker(user)
         return all(
