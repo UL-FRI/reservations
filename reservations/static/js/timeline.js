@@ -71,6 +71,14 @@ function initTimeline() {
     loadReservables();
 }
 
+var stringToColor = (string, saturation = 50, lightness = 50) => {
+    let hash = 0;
+    for (let i = 0; i < string.length; i++) {
+        hash = string.charCodeAt(i) + ((hash << 5) - hash);
+        hash = hash & hash;
+    }
+    return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%)`;
+}
 
 function eventSource({startStr,endStr}, successCallback, failureCallback) {
     fetchEventsInRange(startStr, endStr)
@@ -79,9 +87,11 @@ function eventSource({startStr,endStr}, successCallback, failureCallback) {
                 return {
                     id: reservation.id,
                     content: reservation.reason,
+                    title: reservation.reason,
                     start: new Date(reservation.start),
                     end: new Date(reservation.end),
-                    group: reservation.reservables[0], // Assuming first reservable for grouping
+                    group: reservation.reservables[0], // TODO: Assuming first reservable for grouping
+                    style: `background-color: ${stringToColor(reservation.reason)}`
                 };
             });
             successCallback(events);
