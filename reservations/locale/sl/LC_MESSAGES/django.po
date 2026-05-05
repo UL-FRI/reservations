@@ -160,3 +160,75 @@ msgstr "Dvojna rezervacija ni dovoljena"
 
 #~ msgid "Reservables reserved by the reservation"
 #~ msgstr "Rezervirano s strani rezervacije"
+
+#: templates/reservations/base.html
+msgid "FRIzervacije"
+msgstr "FRIzervacije"
+
+#: templates/reservations/base.html
+msgid "FRI Reservations"
+msgstr "FRI Rezervacije"
+
+#: templates/reservations/base.html
+msgid "English"
+msgstr "Angleščina"
+
+#: templates/reservations/base.html
+msgid "Slovenščina"
+msgstr "Slovenščina"
+
+#: templates/reservations/reservation_form.html
+msgid "Create Reservation"
+msgstr "Ustvari rezervacijo"
+
+#: templates/reservations/reservation_form.html
+msgid "Save"
+msgstr "Shrani"
+
+#: templates/reservations/reservableset_list.html
+msgid "Welcome to FRIzervacije!"
+msgstr "Dobrodošli na FRIzervacije!"
+
+#: templates/reservations/reservableset_list.html
+msgid "These are the ReservableSets on this instance:"
+msgstr "To so razpoložljive skupine rezervacij na tej instanci:"
+
+#: templates/reservations/timeline.html
+msgid "Reservations Calendar"
+msgstr "Koledar rezervacij"
+
+#: templates/reservations/reservation_detail.html
+msgid "Reservation details"
+msgstr "Podrobnosti rezervacije"
+
+#: templates/reservations/reservation_detail.html
+msgid "Reason"
+msgstr "Razlog"
+
+#: templates/reservations/reservation_detail.html
+msgid "From"
+msgstr "Od"
+
+#: templates/reservations/reservation_detail.html
+msgid "To"
+msgstr "Do"
+
+#: templates/reservations/reservation_detail.html
+msgid "Reserved by"
+msgstr "Rezerviral"
+
+#: reservations_site/templates/registration/login.html
+msgid "Login with UL"
+msgstr "Prijava z UL"
+
+#: reservations/views.py
+msgid "Reservation created successfully."
+msgstr "Rezervacija uspešno ustvarjena."
+
+#: reservations/views.py
+msgid "Reservation updated successfully."
+msgstr "Rezervacija uspešno posodobljena."
+
+#: templates/reservations/modal_base.html
+msgid "Close"
+msgstr "Zapri"

@@ -1,8 +1,9 @@
 {% extends 'reservations/base.html' %}
 {% load static %}
+{% load i18n %}
 {% load django_tomselect %}
 
-{% block title %}Reservations Calendar - Rezervacije{% endblock %}
+{% block title %}{% trans "Reservations Calendar" %}{% endblock %}
 
 {% block nav_middle %}
 <div class="gap-2" id="date-picker-container">

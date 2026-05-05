@@ -148,7 +148,7 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
     form_class = ReservationForm
 
     def form_valid(self, form):
-        messages.success(self.request, 'Reservation created successfully.')
+        messages.success(self.request, _('Reservation created successfully.'))
         return super().form_valid(form)
 
     @override
@@ -187,7 +187,7 @@ class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, Updat
         return self.request.path
 
     def form_valid(self, form):
-        messages.success(self.request, 'Reservation updated successfully.')
+        messages.success(self.request, _('Reservation updated successfully.'))
         return super().form_valid(form)
 
 def login_redirect(request):
