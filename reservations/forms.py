@@ -1,14 +1,13 @@
 from datetime import datetime
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Column, Field, Fieldset, Layout, Row, Submit
-from dal.autocomplete import ModelSelect2Multiple
+from crispy_forms.layout import Column, Field, Layout, Row, Submit
 from django import forms
-from django.contrib.auth.models import User
-from reservations.models import Reservable, Reservation
+from reservations.models import Reservation
 from reservations.permissions import ReservationPermission
 from rest_framework.exceptions import PermissionDenied
-
+from django_tomselect.forms import TomSelectModelChoiceField, TomSelectModelMultipleChoiceField
+from django_tomselect.app_settings import PluginDropdownHeader, PluginRemoveButton, TomSelectConfig
 
 class FormWithRequestMixin:
     def __init__(self, request, *args, **kwargs):
@@ -34,32 +33,44 @@ class ActuallyWorkingDateTimeField(forms.DateTimeField):
 class ReservationForm(FormWithRequestMixin, forms.ModelForm):
     start = ActuallyWorkingDateTimeField(label='Start Time')
     end = ActuallyWorkingDateTimeField(label='End Time')
-    owners = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=ModelSelect2Multiple(
-            url='/autocomplete/user/',
-            attrs={
-                'data-placeholder': 'Search for users...',
-                'data-minimum-input-length': 1,
-            },
-        ),
-        required=True
+    owners = TomSelectModelMultipleChoiceField(
+        help_text="These users will be able to modify this reservation later",
+        config=TomSelectConfig(
+            url="autocomplete-user",
+            value_field="id",
+            label_field="full_name",
+            placeholder="Search for users...",
+            minimum_query_length=1,
+            preload="focus",
+            close_after_select=True,
+            plugin_remove_button=PluginRemoveButton(),
+            use_htmx=True,
+        )
     )
-    reservables = forms.ModelMultipleChoiceField(
-        queryset=Reservable.objects.all(),
-        widget=ModelSelect2Multiple(
-            url='/autocomplete/reservable/',
-            attrs={
-                'data-placeholder': 'Search for reservables...',
-                'data-minimum-input-length': 1,
-            },
-        ),
-        required=True
+    reservables = TomSelectModelMultipleChoiceField(
+        help_text="Classrooms, teachers or other objects, which this reservation targets",
+        config=TomSelectConfig(
+            url="autocomplete-reservable",
+            value_field="id",
+            label_field="name",
+            placeholder="Search for reservables...",
+            minimum_query_length=1,
+            preload="focus",
+            close_after_select=True,
+            plugin_remove_button=PluginRemoveButton(),
+            plugin_dropdown_header=PluginDropdownHeader(
+                extra_columns={
+                    "type": "Type"
+                }
+            ),
+            use_htmx=True,
+        )
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        self.helper.form_id = "reservationForm"
         self.helper.form_action = self.request.path
         self.helper.layout = Layout(
             Field("reason", autofocus=1),
@@ -69,8 +80,9 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
             ),
             "owners",
             "reservables",
-            Submit('submit', 'Submit')
         )
+        # Disable inline media - we'll load it in the wrapping template
+        self.helper.include_media = False
     
 
     def clean(self):

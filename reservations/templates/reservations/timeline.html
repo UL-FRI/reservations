@@ -1,5 +1,7 @@
 {% extends 'reservations/base.html' %}
 {% load static %}
+{% load django_tomselect %}
+
 {% block title %}Reservations Calendar - Rezervacije{% endblock %}
 
 {% block nav_middle %}
@@ -19,19 +21,9 @@
 <div id="timeline-container"></div>
 
 <!-- Reservation Modal -->
-<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="reservationModalLabel">Reservation Form</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="reservation-form-container">
-                    <!-- Form will be loaded here -->
-                </div>
-            </div>
-        </div>
+<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-lg">    
+        <div id="reservationModalInside"></div>
     </div>
 </div>
 {% endblock %}
@@ -40,7 +32,9 @@
 <script>
 window.RESERVABLE_SET_SLUG = "{{ reservable_set_slug }}"
 window.RESERVABLE_TYPE_SLUG = "{{ reservable_type_slug }}"
+window.IS_LOGGED_IN = {{ user.is_authenticated|lower }}
 </script>
 <script type="text/javascript" src="https://unpkg.com/vis-timeline@8.1.0/standalone/umd/vis-timeline-graph2d.min.js"></script>
 <script src="{% static 'js/timeline.js' %}"></script>
+{% tomselect_media css_framework="bootstrap5" %}
 {% endblock %}

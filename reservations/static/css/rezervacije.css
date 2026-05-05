@@ -56,13 +56,13 @@ footer {
 }
 .vis-item.vis-range {
     background-color: rgba(var(--bs-primary-rgb), 1);
-    color: white;
+    color: #222;
     cursor: pointer;
     border: none !important;
     border-radius: 0 !important;
 }
 .vis-item.vis-selected, .vis-item.vis-range:hover {
-    filter: brightness(.8) contrast(1.2);
+    filter: brightness(1.1);
 }
 .vis-group:hover, .vis-label {
     background-color: rgba(var(--bs-secondary-rgb), 0.1);

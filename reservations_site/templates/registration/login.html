@@ -1,0 +1,10 @@
+{% extends "reservations/base.html" %}
+{% load crispy_forms_filters %}
+{% block contained %}
+<a href="{% url 'social:begin' 'oidc' %}">Login with UL</a>
+<form action="" method="POST">
+    {{  form|crispy }}
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% endblock %}

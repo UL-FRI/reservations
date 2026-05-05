@@ -21,8 +21,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"] if DEBUG else [])
 
 # Application definition
 INSTALLED_APPS = [
-    "dal",
-    "dal_select2",
+    "django_tomselect",
     "social_django",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -35,14 +34,18 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "guardian",
     "reservations",
+    "reservations_connect",
+    "django_htmx",
     "django_filters",
     "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "django_tomselect.middleware.TomSelectMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -65,6 +68,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django_tomselect.context_processors.tomselect",
             ],
         },
     },
@@ -142,7 +146,7 @@ REST_FRAMEWORK = {
         "reservations_site.permissions.DjangoObjectPermissionsOrReadOnly",
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
+    'PAGE_SIZE': 9999,
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
@@ -152,7 +156,11 @@ INTERNAL_IPS = ["127.0.0.1"]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-if env.str("OIDC_ENDPOINT", default=""):
+TOMSELECT = {
+    "DEFAULT_CSS_FRAMEWORK": "bootstrap5",
+}
+
+if "OIDC_ENDPOINT" in env:
     SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env.str("OIDC_ENDPOINT")
     SOCIAL_AUTH_OIDC_KEY = env.str("OIDC_CLIENT_ID")
     SOCIAL_AUTH_OIDC_SECRET = env.str("OIDC_CLIENT_SECRET")
@@ -169,6 +177,8 @@ if env.str("OIDC_ENDPOINT", default=""):
         'social_core.pipeline.social_auth.associate_user',
         'social_core.pipeline.social_auth.load_extra_data',
         'social_core.pipeline.user.user_details',
+        
+        'reservations_site.social.roles_to_groups',
     ]
 
     SOCIAL_AUTH_OIDC_EXTRA_DATA = [

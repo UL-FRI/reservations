@@ -5,6 +5,7 @@ Used by Django REST framework.
 
 from typing import Optional
 
+from django.contrib.auth.models import Permission, User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from guardian.core import ObjectPermissionChecker

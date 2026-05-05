@@ -2,7 +2,8 @@ const $prevDateBtn = document.getElementById('prev-date-btn');
 const $nextDateBtn = document.getElementById('next-date-btn');
 const $calendarDateInput = document.getElementById('calendar-date');
 const $container = document.getElementById('timeline-container');
-const $formContainer = document.querySelector('.reservation-form-container');
+const modalElement = document.getElementById('reservationModal');
+const $formContainer = document.querySelector('#reservationModalInside');
 
 // Global variables
 let timeline = null;
@@ -24,7 +25,7 @@ function initTimeline() {
         },
 
         // Interaction
-        editable: true,
+        editable: IS_LOGGED_IN,
         onAdd: eventCreated,
 
         selectable: false,
@@ -45,15 +46,15 @@ function initTimeline() {
 
         // Hide morning and evening
         hiddenDates: [{
-                start: "2025-01-01T00:01:00",
-                end: "2025-01-01T07:00:00",
-                repeat: 'daily'
-            },
-            {
-                start: "2025-01-01T19:00:00",
-                end: "2025-01-01T23:58:59",
-                repeat: 'daily'
-            }
+            start: "2025-01-01T00:01:00",
+            end: "2025-01-01T07:00:00",
+            repeat: 'daily'
+        },
+        {
+            start: "2025-01-01T19:00:00",
+            end: "2025-01-01T23:58:59",
+            repeat: 'daily'
+        }
         ]
     };
 
@@ -61,7 +62,7 @@ function initTimeline() {
     timeline = new vis.Timeline($container, items, groups, options);
 
     // Add event listeners
-    timeline.on('click', function(properties) {
+    timeline.on('click', function (properties) {
         if (properties.item !== null) {
             eventClicked(properties.item);
         }
@@ -71,7 +72,7 @@ function initTimeline() {
     loadReservables();
 }
 
-var stringToColor = (string, saturation = 50, lightness = 50) => {
+var stringToColor = (string, saturation = 70, lightness = 70) => {
     let hash = 0;
     for (let i = 0; i < string.length; i++) {
         hash = string.charCodeAt(i) + ((hash << 5) - hash);
@@ -80,7 +81,7 @@ var stringToColor = (string, saturation = 50, lightness = 50) => {
     return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%)`;
 }
 
-function eventSource({startStr,endStr}, successCallback, failureCallback) {
+function eventSource({ startStr, endStr }, successCallback, failureCallback) {
     fetchEventsInRange(startStr, endStr)
         .then(data => {
             const events = data.results.map(reservation => {
@@ -118,80 +119,17 @@ function loadReservables() {
         });
 }
 
-function hijackForms(formContainer) {
-    const forms = formContainer.querySelectorAll('form');
-    forms.forEach(form => {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            formContainer.classList.add("loading");
-            const formData = new FormData(form);
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Modal': 'Yes'
-                }
-            });
-            if (response.headers["Modal-Close"] === "Yes") {
-
-            }
-            formContainer.innerHTML = await response.text();
-            hijackForms(formContainer);
-            formContainer.classList.remove("loading");
-        });
-    });
-}
-
-// Source - https://stackoverflow.com/a/47614491
-// Posted by allenhwkim, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-04-02, License - CC BY-SA 4.0
-
-function setInnerHTML(elm, html) {
-  elm.innerHTML = html;
-  
-  Array.from(elm.querySelectorAll("script"))
-    .forEach( oldScriptEl => {
-      const newScriptEl = document.createElement("script");
-      
-      Array.from(oldScriptEl.attributes).forEach( attr => {
-        newScriptEl.setAttribute(attr.name, attr.value) 
-      });
-      
-      const scriptText = document.createTextNode(oldScriptEl.innerHTML);
-      newScriptEl.appendChild(scriptText);
-      
-      oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
-  });
-}
-
 
 function openForm(formUrl) {
-
-  // Show modal
-  const modalElement = document.getElementById('reservationModal');
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
-  // Clear on close
-  modalElement.addEventListener('hidden.bs.modal', () => {
-    $formContainer.innerHTML = '';
-    // Force refresh data
-    $calendarDateInput.dispatchEvent(new Event('change'));
-
-  });
-
-    fetch(formUrl, {
-            headers: {
-                'Modal': 'Yes'
-            }
-        }).then(async resp1 => {
-            // Insert form HTML into modal
-            setInnerHTML($formContainer, await resp1.text());
-            hijackForms($formContainer);
-        })
-        .catch(error => {
-            console.error('Error loading form:', error);
-            alert('Error loading reservation form. Please try again.');
-        });
+    // Show modal
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    // Load form content
+    htmx.ajax('GET', formUrl, $formContainer);
+    // Clear on close
+    // modalElement.addEventListener('hidden.bs.modal', () => {
+    //   $formContainer.innerHTML = '';
+    // });
 }
 
 function eventClicked(event_id) {
@@ -199,10 +137,10 @@ function eventClicked(event_id) {
 }
 
 function eventCreated(props, callback) {
-  // Immediately destroy the temporary item
-  callback(null)
-  // Open the creation form
-  openForm(`/reservations/create?start=${props.start.toISOString()}&end=${props.end.toISOString()}&reservables=${props.group}`)
+    // Immediately destroy the temporary item
+    callback(null)
+    // Open the creation form
+    openForm(`/reservations/create?start=${props.start.toISOString()}&end=${props.end.toISOString()}&reservables=${props.group}`)
 }
 
 
@@ -215,24 +153,22 @@ function setCalendarDate(centerDate) {
     centerDate.setHours(12);
     centerDate.setMinutes(0);
 
-    console.debug("Setting center date:", centerDate)
-
     // Start and end of date range
     const start = new Date(centerDate.getFullYear(), centerDate.getMonth(), centerDate.getDate() - DAYS_BEFORE);
     start.setHours(0);
     start.setMinutes(0);
     const end = new Date(centerDate.getFullYear(), centerDate.getMonth(), centerDate.getDate() + DAYS_AFTER);
-		end.setHours(23);
+    end.setHours(23);
     end.setMinutes(59);
 
     // Start loading data
     eventSource({
         startStr: start.toISOString(),
         endStr: end.toISOString()
-    }, function(events) {
+    }, function (events) {
         items.clear();
         items.add(events);
-    }, function(error) {
+    }, function (error) {
         console.error('Error loading events:', error);
     });
 
@@ -257,11 +193,11 @@ function getDateFromURL() {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initTimeline();
 
     // Handle previous date button click
-    $prevDateBtn.addEventListener('click', function() {
+    $prevDateBtn.addEventListener('click', function () {
         const prevDate = new Date($calendarDateInput.value);
         prevDate.setDate(prevDate.getDate() - BUTTON_SKIP);
         $calendarDateInput.value = prevDate.toISOString().split('T')[0];
@@ -269,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle next date button click
-    $nextDateBtn.addEventListener('click', function() {
+    $nextDateBtn.addEventListener('click', function () {
         const nextDate = new Date($calendarDateInput.value);
         nextDate.setDate(nextDate.getDate() + BUTTON_SKIP);
         $calendarDateInput.value = nextDate.toISOString().split('T')[0];
@@ -277,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle date input change
-    $calendarDateInput.addEventListener('change', function() {
+    $calendarDateInput.addEventListener('change', function () {
         const selectedDate = new Date(this.value);
         if (!isNaN(selectedDate.getTime())) {
             setCalendarDate(selectedDate);

@@ -1,0 +1,38 @@
+{% extends "reservations/auto_base.html" %}
+{% block title %}Reservation details{% endblock %}
+
+{% block contained %}
+<dl class="row">
+    <div class="col">
+        <dt>From</dt>
+        <dd>{{ reservation.start }}</dd>
+    </div>
+    <div class="col">
+        <dt>To</dt>
+        <dd>{{ reservation.end }}</dd>
+    </div>
+</dl>
+
+{% if reservation.owners.exists %}
+<dl class="row">
+    <dt>Reserved by</dt>
+    <dd>{% for owner in reservation.owners.all %}{{ reservation.owners }}{% if not loop.last %},{% endif %}{% endfor %}</dd>
+</dl>
+{% endif %}
+
+<dl class="row">
+{% for type, reservables in reservables_by_type.items %}
+<div class="col">
+    <dt>{{ type }}</dt>
+    <dd>
+        <ul class="list-group">
+            {% for reservable in reservables %}
+                <li class="list-group-item">{{ reservable.name }}</li>
+            {% endfor %}
+        </ul>
+    </dd>
+</div>
+{% endfor %}
+</dl>
+
+{% endblock %}

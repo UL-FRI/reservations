@@ -1,5 +1,7 @@
 """Reservation application views."""
 
+from collections import defaultdict
+from datetime import datetime
 from typing import Optional, override
 from urllib.parse import urlencode
 
@@ -10,8 +12,10 @@ from django.http.request import HttpRequest
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
+from django_tomselect.app_settings import TomSelectConfig
 from guardian.mixins import PermissionRequiredMixin
 from reservations.filters import (NResourcesFilter, ReservableFilter,
                                   ReservableSetFilter, ReservationFilter,
@@ -123,6 +127,20 @@ class GiveFormRequestMixin:
         kwargs['request'] = self.request
         return kwargs
 
+class ReservationDetailView(DetailView):
+    model = Reservation
+
+    @override
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # Grup reservables by type for easier display in the template
+        by_type = defaultdict(list)
+        for r in self.object.reservables.all():
+            by_type[r.type].append(r)
+        return ctx | {
+            "reservables_by_type": dict(by_type)
+        }
+
 # Permission are shared between the create and update views, so they're implemented in the form. This also leads to nicer error messages.
 
 class ReservationCreateView(GiveFormRequestMixin, CreateView):
@@ -139,12 +157,19 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # Copy initial valued from GET parameters (for embedded create form)
-        for key, value in self.request.GET.items():
-            initial[key] = value
+        # Copy initial values from GET parameters (for embedded create form)
+        if "start" in self.request.GET:
+            initial["start"] = datetime.fromisoformat(self.request.GET["start"])
+        if "end" in self.request.GET:
+            initial["end"] = datetime.fromisoformat(self.request.GET["end"])
         # Set the initial owners to the current user
-        initial["owners"] = [self.request.user]
+        initial["owners"] = [self.request.user.id]
         return initial
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["reservables"]
+        return form
 
 
 class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, UpdateView):

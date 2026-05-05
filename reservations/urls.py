@@ -1,12 +1,11 @@
 from django.urls import include, path, re_path
 from django.views.generic.base import RedirectView
 from django.views.i18n import JavaScriptCatalog
-from reservations.autocomplete_light_registry import (ReservableAutocomplete,
-                                                      UserAutocomplete)
+from reservations.autocomplete import ReservableAutocomplete, UserAutocomplete
 from reservations.views import (HomeView, NResourcesViewSet,
                                 OldReservableViewSet, OldReservationViewSet,
                                 ReservableSetViewSet, ReservableViewSet,
-                                ReservationCreateView, ReservationUpdateView,
+                                ReservationCreateView, ReservationDetailView, ReservationUpdateView,
                                 ReservationViewSet, ResourceViewSet,
                                 TimelineView, UserViewSet, login_redirect)
 from rest_framework import routers
@@ -32,7 +31,8 @@ urlpatterns = [
 
     # Reservation management form
     path("reservations/create", ReservationCreateView.as_view(), name="reservation_create"),
-    path("reservations/<int:pk>/", ReservationUpdateView.as_view(), name="reservation_update"),
+    path("reservations/<int:pk>/", ReservationDetailView.as_view(), name="reservation_detail"),
+    path("reservations/<int:pk>/edit", ReservationUpdateView.as_view(), name="reservation_update"),
 
     # Autocomplete views
     path('autocomplete/user/',UserAutocomplete.as_view(),name='autocomplete-user'),
