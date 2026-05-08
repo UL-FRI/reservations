@@ -1,12 +1,9 @@
+from django.contrib.auth.models import User
 from django.db.models import Value
 from django.db.models.functions.text import Concat
-from django.db.models.query import QuerySet
 from guardian.shortcuts import get_objects_for_user
-from typing_extensions import Any
 from reservations.models import Reservable
 from django_tomselect.autocompletes import AutocompleteModelView
-
-from reservations.tests import User
 
 
 class ReservableAutocomplete(AutocompleteModelView):
