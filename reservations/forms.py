@@ -1,13 +1,14 @@
 from datetime import datetime
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Column, Field, Layout, Row, Submit
+from crispy_forms.layout import Column, Field, Layout, Row
 from django import forms
 from reservations.models import Reservation
 from reservations.permissions import ReservationPermission
 from rest_framework.exceptions import PermissionDenied
-from django_tomselect.forms import TomSelectModelChoiceField, TomSelectModelMultipleChoiceField
+from django_tomselect.forms import TomSelectModelMultipleChoiceField
 from django_tomselect.app_settings import PluginDropdownHeader, PluginRemoveButton, TomSelectConfig
+from django.utils.translation import gettext_lazy as _
 
 class FormWithRequestMixin:
     def __init__(self, request, *args, **kwargs):
@@ -34,7 +35,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
     start = ActuallyWorkingDateTimeField(label='Start Time')
     end = ActuallyWorkingDateTimeField(label='End Time')
     owners = TomSelectModelMultipleChoiceField(
-        help_text="These users will be able to modify this reservation later",
+        help_text=_("These users will be able to modify this reservation later"),
         config=TomSelectConfig(
             url="autocomplete-user",
             value_field="id",
@@ -48,7 +49,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
         )
     )
     reservables = TomSelectModelMultipleChoiceField(
-        help_text="Classrooms, teachers or other objects, which this reservation targets",
+        help_text=_("Classrooms, teachers or other objects, which this reservation targets"),
         config=TomSelectConfig(
             url="autocomplete-reservable",
             value_field="id",

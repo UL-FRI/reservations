@@ -138,7 +138,8 @@ class ReservationDetailView(DetailView):
         for r in self.object.reservables.all():
             by_type[r.type].append(r)
         return ctx | {
-            "reservables_by_type": dict(by_type)
+            "reservables_by_type": dict(by_type),
+            "can_edit": self.request.user.has_perm('reservations.change_reservation', self.object),
         }
 
 # Permission are shared between the create and update views, so they're implemented in the form. This also leads to nicer error messages.
@@ -178,8 +179,6 @@ class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, Updat
     
     
     def get_required_permissions(self, request: Optional[HttpRequest] = None) -> list[str]:
-        if request.method in SAFE_METHODS:
-            return []
         return ['reservations.change_reservation']
 
     @override
@@ -190,9 +189,13 @@ class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, Updat
         messages.success(self.request, _('Reservation updated successfully.'))
         return super().form_valid(form)
 
+class ReservationDeleteView(PermissionRequiredMixin, UpdateView):
+    model = Reservation
+    permission_required = 'reservations.delete_reservation'
+
 def login_redirect(request):
     # If OIDC is configured, redirect to the OIDC login page
     if hasattr(settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT"):
         return RedirectView.as_view(url=reverse('social:begin', kwargs={'backend': 'oidc'}))(request)
     # Otherwise, use the admin login page
-    return RedirectView.as_view(url=reverse('auth:login'))(request)
+    return RedirectView.as_view(url=reverse('login'))(request)

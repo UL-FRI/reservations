@@ -47,6 +47,6 @@ urlpatterns = [
     path("reservations/", OldReservationViewSet.as_view()),
 
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
-    path("login/", login_redirect, name="login"),
-    path("accounts/", include(("django.contrib.auth.urls", "django.contrib.auth"), namespace="auth")),
+    path("autologin/", login_redirect, name="autologin"),
+    path("accounts/", include("django.contrib.auth.urls")),
 ]

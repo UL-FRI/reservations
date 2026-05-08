@@ -20,6 +20,15 @@ class StudentAdmin(admin.ModelAdmin):
 
 class ReservationAdmin(GuardedModelAdmin):
     search_fields = ("reason",)
+    list_display = ("reason", "start", "end", "_reservables",)
+    list_filter = ("reservables__type", "reservables__reservableset_set", "importbatch")
+    raw_id_fields = ("reservables", "owners",)
+
+    def _reservables(self, obj):
+        return ", ".join(r.name for r in obj.reservables.all())
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("reservables")
 
 
 class ReservableAdmin(GuardedModelAdmin):

@@ -1,22 +1,3 @@
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-#
-# Gregor Jerše <gregor@jerse.info>, 2014.
-msgid ""
-msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-23 15:59+0100\n"
-"PO-Revision-Date: 2014-10-30 13:31+0100\n"
-"Last-Translator: Gregor Jerše <gregor@jerse.info>\n"
-"Language-Team: American English <kde-i18n-doc@kde.org>\n"
-"Language: en_US\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
-
 #: models.py:43 models.py:79 templates/reservations/my_reservations.html:34
 #: templates/reservations/reservation-detail.html:89
 msgid "reservables"
@@ -169,14 +150,6 @@ msgstr "FRIzervacije"
 msgid "FRI Reservations"
 msgstr "FRI Rezervacije"
 
-#: templates/reservations/base.html
-msgid "English"
-msgstr "Angleščina"
-
-#: templates/reservations/base.html
-msgid "Slovenščina"
-msgstr "Slovenščina"
-
 #: templates/reservations/reservation_form.html
 msgid "Create Reservation"
 msgstr "Ustvari rezervacijo"
@@ -187,7 +160,7 @@ msgstr "Shrani"
 
 #: templates/reservations/reservableset_list.html
 msgid "Welcome to FRIzervacije!"
-msgstr "Dobrodošli na FRIzervacije!"
+msgstr "Dobrodošli na FRIzervacijah!"
 
 #: templates/reservations/reservableset_list.html
 msgid "These are the ReservableSets on this instance:"

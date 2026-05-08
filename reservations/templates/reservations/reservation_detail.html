@@ -41,4 +41,11 @@
 {% endfor %}
 </dl>
 
+{% if can_edit %}
+    {% block modal_footer %}
+        <a hx-get="{% url 'reservation_update' reservation.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+        <a hx-delete="{% url 'reservation_update' reservation.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
+    {% endblock %}
+{% endif %}
+
 {% endblock %}

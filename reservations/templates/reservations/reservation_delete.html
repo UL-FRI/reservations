@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load i18n %}
 
-{% block title %}{% trans "Create Reservation" %}{% endblock %}
+{% block title %}{% trans "Delete Reservation" %}{% endblock %}
 
 {% block contained %}
 {% crispy form %}
@@ -12,16 +12,12 @@
     <input 
         type="submit" 
         name="submit" 
-        value="{% trans "Save" %}" 
+        value="{% trans "Delete" %}" 
         class="btn btn-primary" 
         form="reservationForm"
-        hx-post="/reservations/create" 
+        hx-post="/reservations/delete/{{ reservation.pk }}" 
     >
 {% endblock %}
 
 {% block extra_js %}
-    {% if not request.htmx %}
-        {% load django_tomselect %}
-        {% tomselect_media css_framework="bootstrap5" %}
-    {% endif %}
 {% endblock %}

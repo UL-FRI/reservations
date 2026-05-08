@@ -1,0 +1,3 @@
+[submodule "reservations_connect"]
+	path = reservations_connect
+	url = https://github.com/UL-FRI/reservations_connect.git
