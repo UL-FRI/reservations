@@ -4,14 +4,14 @@ const $calendarDateInput = document.getElementById('calendar-date');
 const $container = document.getElementById('timeline-container');
 const modalElement = document.getElementById('reservationModal');
 const $formContainer = document.querySelector('#reservationModalInside');
+const $daysDropdownButton = document.getElementById('daysDropdown');
 
 // Global variables
 let timeline = null;
 let items = new vis.DataSet([]);
 let groups = new vis.DataSet([]);
 
-const DAYS_BEFORE = 2;
-const DAYS_AFTER = 2;
+let DISPLAY_DAYS = 5;
 const BUTTON_SKIP = 2;
 
 // Initialize the timeline
@@ -31,11 +31,8 @@ function initTimeline() {
         selectable: false,
         moveable: true,
 
-        zoomable: true,
-        zoomMin: 1000 * 60 * 60,
-        zoomMax: 1000 * 60 * 60 * 24 * 7,
-
-        zoomKey: 'ctrlKey',
+        // Disable zooming
+        zoomable: false,
         horizontalScroll: true,
         // horizontalScrollKey: 'shiftKey',
 
@@ -153,11 +150,13 @@ function setCalendarDate(centerDate) {
     centerDate.setHours(12);
     centerDate.setMinutes(0);
 
-    // Start and end of date range
-    const start = new Date(centerDate.getFullYear(), centerDate.getMonth(), centerDate.getDate() - DAYS_BEFORE);
+    // Start and end of date range based on DISPLAY_DAYS
+    const before = Math.floor((DISPLAY_DAYS - 1) / 2);
+    const after = DISPLAY_DAYS - before - 1;
+    const start = new Date(centerDate.getFullYear(), centerDate.getMonth(), centerDate.getDate() - before);
     start.setHours(0);
     start.setMinutes(0);
-    const end = new Date(centerDate.getFullYear(), centerDate.getMonth(), centerDate.getDate() + DAYS_AFTER);
+    const end = new Date(centerDate.getFullYear(), centerDate.getMonth(), centerDate.getDate() + after);
     end.setHours(23);
     end.setMinutes(59);
 
@@ -177,7 +176,7 @@ function setCalendarDate(centerDate) {
         min: start,
         max: end,
     });
-    timeline.moveTo(centerDate);
+    timeline.setWindow(start, end);
 }
 
 function getDateFromURL() {
@@ -194,6 +193,14 @@ function getDateFromURL() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
+    // Query DOM elements after document is ready
+    // $prevDateBtn = document.getElementById('prev-date-btn');
+    // $nextDateBtn = document.getElementById('next-date-btn');
+    // $calendarDateInput = document.getElementById('calendar-date');
+    // $container = document.getElementById('timeline-container');
+    // modalElement = document.getElementById('reservationModal');
+    // $formContainer = document.querySelector('#reservationModalInside');
+
     initTimeline();
 
     // Handle previous date button click
@@ -220,10 +227,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Handle zoom days dropdown
+    document.querySelectorAll('.days-option').forEach(el => el.addEventListener('click', function(e) {
+        e.preventDefault();
+        const days = parseInt(this.getAttribute('data-days'), 10);
+        setDays(days)
+    }));
+
     const initialDate = getDateFromURL();
-    $calendarDateInput.value = (initialDate || new Date()).toISOString().split('T')[0]
-    $calendarDateInput.dispatchEvent(new Event('change'));
+    $calendarDateInput.value = (initialDate || new Date()).toISOString().split('T')[0];
+    
+    setDays(parseInt(localStorage.getItem('displayDays'), 10) || DISPLAY_DAYS)
 });
+
+function setDays(days) {
+    DISPLAY_DAYS = days;
+    $daysDropdownButton.textContent = `${days}d`;
+    localStorage.setItem('displayDays', days);
+    setCalendarDate(new Date($calendarDateInput.value));
+}
 
 async function fetchReservables() {
     const res = await fetch(`/api/reservables/?reservableset_set__slug=${window.RESERVABLE_SET_SLUG}&type=${window.RESERVABLE_TYPE_SLUG}`)
