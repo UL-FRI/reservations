@@ -104,6 +104,8 @@ class Reservable(models.Model):
     #: The reservable resources.
     resources = models.ManyToManyField("Resource", through="NResources")
 
+    order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
     class Meta:
         permissions = (
             ("reserve", "Create a reservation using this reservable"),
@@ -112,6 +114,7 @@ class Reservable(models.Model):
         )
         verbose_name = _("reservable")
         verbose_name_plural = _("reservables")
+        ordering = ['order']
 
     def __str__(self) -> str:
         """Return human readable representation."""

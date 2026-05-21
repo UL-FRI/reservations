@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "guardian",
+    "adminsortable2",
     "reservations",
     "reservations_connect",
     "reservations_connect.fri_urnik",

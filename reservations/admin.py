@@ -1,15 +1,13 @@
-"""
-Register models in Django admin.
-"""
-
 from typing import override
+
 from django.contrib import admin
 from django.contrib.auth.models import Permission
+from adminsortable2.admin import SortableAdminMixin
 from guardian.admin import GuardedModelAdmin
+
 from reservations.merge import merge_reservables
 from reservations.models import NRequirements, NResources, Reservable, ReservableSet, Reservation, Resource, UserProfile
 from reservations_connect.models import ForeignReservable
-
 
 class StudentAdmin(admin.ModelAdmin):
     filter_horizontal = ("groups",)
@@ -28,9 +26,9 @@ class ReservationAdmin(GuardedModelAdmin):
         return super().get_queryset(request).prefetch_related("reservables")
 
 
-class ReservableAdmin(GuardedModelAdmin):
+class ReservableAdmin(SortableAdminMixin, GuardedModelAdmin):
     search_fields = ("name", "slug")
-    list_display = ("name", "type", "_reservablesets")
+    list_display = ("order", "name", "type", "_reservablesets")
     list_filter = ("type", "reservableset_set")
     actions = ["merge_reservables"]
 
