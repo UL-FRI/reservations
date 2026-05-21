@@ -61,7 +61,8 @@ function initTimeline() {
     // Add event listeners
     timeline.on('click', function (properties) {
         if (properties.item !== null) {
-            eventClicked(properties.item);
+            const realItem = items.get(properties.item);
+            eventClicked(realItem.reservationId);
         }
     });
 
@@ -81,16 +82,17 @@ var stringToColor = (string, saturation = 70, lightness = 70) => {
 function eventSource({ startStr, endStr }, successCallback, failureCallback) {
     fetchEventsInRange(startStr, endStr)
         .then(data => {
-            const events = data.results.map(reservation => {
-                return {
-                    id: reservation.id,
+            const events = data.results.flatMap(reservation => {
+                return (reservation.reservables || []).map(reservableId => ({
+                    id: `${reservation.id}-${reservableId}`,
                     content: reservation.reason,
                     title: reservation.reason,
                     start: new Date(reservation.start),
                     end: new Date(reservation.end),
-                    group: reservation.reservables[0], // TODO: Assuming first reservable for grouping
-                    style: `background-color: ${stringToColor(reservation.reason)}`
-                };
+                    group: reservableId,
+                    style: `background-color: ${stringToColor(reservation.reason)}`,
+                    reservationId: reservation.id,
+                }));
             });
             successCallback(events);
         })
