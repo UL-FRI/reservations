@@ -15,13 +15,16 @@
             <li><a class="dropdown-item days-option" href="#" data-days="5">5 days</a></li>
         </ul>
     </div>
-    <button class="btn btn-sm btn-outline-light" id="prev-date-btn">⏴</button>
-    <input type="date" class="form-control form-control-sm" id="calendar-date">
-    <button class="btn btn-sm btn-outline-light" id="next-date-btn">⏵</button>
+    <div class="input-group input-group-sm">
+        <button class="btn btn-outline-light" type="button" id="prev-date-btn">⏴</button>
+        <input type="date" class="form-control" id="calendar-date" />
+        <button class="btn btn-outline-light" type="button" id="next-date-btn">⏵</button>
+    </div>
 </div>
 {% endblock %}
 
 {% block content %}
+<button class="btn btn-primary" id="add-btn" onclick="openForm()">+</button>
 <!-- Timeline Container -->
 <div id="timeline-container"></div>
 {% endblock %}
@@ -35,8 +38,19 @@
 </div>
 
 <style>
-.navbar-brand {
-    display: none;
+@media (max-width: 600px) {
+    .navbar-brand {
+        display: none;
+    }
+}
+body > main {
+    position: relative;
+}
+#add-btn {
+    z-index: 10;
+    position: absolute;
+    left: 5px;
+    top: 5px;
 }
 </style>
 

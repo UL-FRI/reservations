@@ -12,7 +12,7 @@ let items = new vis.DataSet([]);
 let groups = new vis.DataSet([]);
 
 let DISPLAY_DAYS = 5;
-const BUTTON_SKIP = 2;
+let BUTTON_SKIP = 2;
 
 // Initialize the timeline
 function initTimeline() {
@@ -33,7 +33,7 @@ function initTimeline() {
 
         // Disable zooming
         zoomable: false,
-        horizontalScroll: true,
+        horizontalScroll: false,
         // horizontalScrollKey: 'shiftKey',
 
         // Design stuff
@@ -43,13 +43,13 @@ function initTimeline() {
 
         // Hide morning and evening
         hiddenDates: [{
-            start: "2025-01-01T00:01:00",
-            end: "2025-01-01T07:00:00",
+            start: "2025-01-01T00:00:01",
+            end: "2025-01-01T06:00:00",
             repeat: 'daily'
         },
         {
-            start: "2025-01-01T19:00:00",
-            end: "2025-01-01T23:58:59",
+            start: "2025-01-01T20:00:00",
+            end: "2025-01-01T23:59:59",
             repeat: 'daily'
         }
         ]
@@ -119,16 +119,16 @@ function loadReservables() {
 }
 
 
-function openForm(formUrl) {
+function openForm(formUrl = `/reservations/create`) {
     // Show modal
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
     // Load form content
     htmx.ajax('GET', formUrl, $formContainer);
     // Clear on close
-    // modalElement.addEventListener('hidden.bs.modal', () => {
-    //   $formContainer.innerHTML = '';
-    // });
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        $formContainer.innerHTML = '';
+    });
 }
 
 function eventClicked(event_id) {
@@ -195,14 +195,6 @@ function getDateFromURL() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
-    // Query DOM elements after document is ready
-    // $prevDateBtn = document.getElementById('prev-date-btn');
-    // $nextDateBtn = document.getElementById('next-date-btn');
-    // $calendarDateInput = document.getElementById('calendar-date');
-    // $container = document.getElementById('timeline-container');
-    // modalElement = document.getElementById('reservationModal');
-    // $formContainer = document.querySelector('#reservationModalInside');
-
     initTimeline();
 
     // Handle previous date button click
@@ -244,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function setDays(days) {
     DISPLAY_DAYS = days;
+    BUTTON_SKIP = days > 1 ? 2 : 1;
     $daysDropdownButton.textContent = `${days}d`;
     localStorage.setItem('displayDays', days);
     setCalendarDate(new Date($calendarDateInput.value));
