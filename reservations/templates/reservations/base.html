@@ -38,7 +38,7 @@ hx-target="closest .htmxTarget">
                             <!--<span class="color-text me-1">{{ request.user.username }}</span>-->
                             <form action="{% url 'logout' %}" method="post" class="d-inline">
                               {% csrf_token %}
-                              <button type="submit" class="btn btn-link nav-link">{% trans "Logout" %}</button>
+                              <button type="submit" class="btn btn-link nav-link">{% trans "Log out" %}</button>
                             </form>
                         </li>
                         {% else %}

@@ -21,10 +21,7 @@ class ActuallyWorkingDateTimeInput(forms.DateTimeInput):
         super().__init__(*args, **kwargs, attrs={'type': 'datetime-local'})
 
     def format_value(self, value):
-        try:
-            value = datetime.fromisoformat(value).strftime('%Y-%m-%dT%H:%M:%S')
-        except: pass
-        return super().format_value(value)
+        return value.strftime('%Y-%m-%dT%H:%M:%S')
 
 class ActuallyWorkingDateTimeField(forms.DateTimeField):
     """Version of DateTimeField that uses a proper date input widget."""
