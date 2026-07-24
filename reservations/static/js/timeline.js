@@ -13,9 +13,17 @@ let groups = new vis.DataSet([]);
 
 let DISPLAY_DAYS = 5;
 let BUTTON_SKIP = 2;
+let DONE_LOADING = false;
+
+// Default to 1 day on small screens
+if (window.screen.width < 900) {
+    DISPLAY_DAYS = 1
+}
 
 // Initialize the timeline
 function initTimeline() {
+    DISPLAY_DAYS = parseInt(localStorage.getItem('displayDays'), 10) || DISPLAY_DAYS;    
+    const [start, end] = getRange()
 
     const options = {
         orientation: 'top',
@@ -27,33 +35,43 @@ function initTimeline() {
         // Interaction
         editable: IS_LOGGED_IN,
         onAdd: eventCreated,
+        onInitialDrawComplete: () => DONE_LOADING = true,
 
         selectable: false,
         moveable: true,
 
-        // Disable zooming
-        zoomable: false,
-        horizontalScroll: false,
-        // horizontalScrollKey: 'shiftKey',
-
+        zoomable: true,
+        zoomMin: 1000 * 60 * 60,
+        zoomMax: 1000 * 60 * 60 * 24 * 7,
+        zoomKey: 'ctrlKey',
+        horizontalScrollKey: 'shiftKey',
+        
         // Design stuff
         margin: {
             item: 0
         },
 
         // Hide morning and evening
-        hiddenDates: [{
-            start: "2025-01-01T00:00:01",
-            end: "2025-01-01T06:00:00",
-            repeat: 'daily'
-        },
-        {
-            start: "2025-01-01T20:00:00",
-            end: "2025-01-01T23:59:59",
-            repeat: 'daily'
-        }
-        ]
+        hiddenDates: [
+            {
+                start: "2025-01-01T00:00:00",
+                end: "2025-01-01T06:00:00",
+                repeat: 'daily'
+            },
+            {
+                start: "2025-01-01T20:00:00",
+                end: "2025-01-02T00:00:00",
+                repeat: 'daily'
+            }
+        ],
+        // Initial start/end and min/max
+        start: start,
+        min: start,
+        max: end,
+        end: end,
     };
+
+    console.debug(options)
 
     // Create the timeline
     timeline = new vis.Timeline($container, items, groups, options);
@@ -143,7 +161,7 @@ function eventCreated(props, callback) {
 }
 
 
-function setCalendarDate(centerDate) {
+function getRange(centerDate) {
     // Default to today
     if (!centerDate)
         centerDate = new Date();
@@ -162,23 +180,41 @@ function setCalendarDate(centerDate) {
     end.setHours(23);
     end.setMinutes(59);
 
+    return [start, end]
+}
+
+function setCalendarDate(centerDate) {
+    const [start, end] = getRange(centerDate)
+
     // Start loading data
     eventSource({
         startStr: start.toISOString(),
         endStr: end.toISOString()
     }, function (events) {
-        items.clear();
-        items.add(events);
+        items.update(events);
     }, function (error) {
         console.error('Error loading events:', error);
     });
 
-    // Move the timeline
+    if (!DONE_LOADING)
+        return;
+
+    // Disable the limit before moving
     timeline.setOptions({
-        min: start,
-        max: end,
+        min: 0,
+        max: Number.MAX_SAFE_INTEGER,
     });
-    timeline.setWindow(start, end);
+    // Animate to the new location
+    timeline.setWindow(start, end, {
+        animation: true,
+    },
+        // Re-enable the limit after the animation
+        () => {
+        timeline.setOptions({
+            min: start,
+            max: end,
+        });
+    });
 }
 
 function getDateFromURL() {
@@ -231,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const initialDate = getDateFromURL();
     $calendarDateInput.value = (initialDate || new Date()).toISOString().split('T')[0];
     
-    setDays(parseInt(localStorage.getItem('displayDays'), 10) || DISPLAY_DAYS)
+    setDays(DISPLAY_DAYS)
 });
 
 function setDays(days) {
