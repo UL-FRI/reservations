@@ -1,7 +1,7 @@
 #: models.py:43 models.py:79 templates/reservations/my_reservations.html:34
 #: templates/reservations/reservation-detail.html:89
 msgid "reservables"
-msgstr "rezervirano"
+msgstr "reservables"
 
 #: models.py:75 templates/reservations/my_reservations.html:31
 #: templates/reservations/reservation-detail.html:61
@@ -78,7 +78,7 @@ msgstr ""
 #, fuzzy
 #| msgid "reservables"
 msgid "Reservables"
-msgstr "rezervirano"
+msgstr "Reservables"
 
 #: templates/reservations/filtered-reservables.html:76
 #: templates/reservations/reservable-list.html:76
@@ -140,7 +140,7 @@ msgstr "Dvojna rezervacija ni dovoljena"
 #~ msgstr "konec"
 
 #~ msgid "Reservables reserved by the reservation"
-#~ msgstr "Rezervirano s strani rezervacije"
+#~ msgstr "Reservables na tej rezervaciji"
 
 #: templates/reservations/base.html
 msgid "FRIzervacije"
