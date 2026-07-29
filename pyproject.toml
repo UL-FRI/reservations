@@ -35,7 +35,7 @@ dev = [
     "pytest>=9.0.3",
     "requests>=2.32.5",
     "tqdm>=4.67.1",
-    # "xsdata[cli,lxml]>=26.2",
+    "xsdata[cli,lxml]>=26.2",
 ]
 production = [
     "hypercorn>=0.18.0",
