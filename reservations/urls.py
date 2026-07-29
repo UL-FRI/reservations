@@ -49,4 +49,6 @@ urlpatterns = [
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
     path("autologin/", login_redirect, name="autologin"),
     path("accounts/", include("django.contrib.auth.urls")),
+
+    path("", include("reservations_connect.metronik.urls"), name="metronik_debug"),
 ]
