@@ -10,14 +10,10 @@ from reservations.merge import merge_reservables
 from reservations.models import NRequirements, NResources, Reservable, ReservableSet, Reservation, Resource, UserProfile
 from reservations_connect.models import ForeignReservable
 
-class StudentAdmin(admin.ModelAdmin):
-    filter_horizontal = ("groups",)
-
-
 class ReservationAdmin(GuardedModelAdmin):
     search_fields = ("reason",)
     list_display = ("reason", "start", "end", "_reservables")
-    list_filter = ("reservables__type", "reservables__reservableset_set", ("reservables", RelatedDropdownFilter), ("importbatch", RelatedDropdownFilter))
+    list_filter = ("reservables__type", "reservables__reservableset_set", "start", ("reservables", RelatedDropdownFilter), ("importbatch", RelatedDropdownFilter))
     raw_id_fields = ("reservables", "owners")
 
     def _reservables(self, obj):
@@ -87,9 +83,9 @@ class ReservableSetAdmin(GuardedModelAdmin):
 
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Reservable, ReservableAdmin)
-admin.site.register(Resource)
-admin.site.register(NResources)
+# admin.site.register(Resource)
+# admin.site.register(NResources)
 admin.site.register(ReservableSet, ReservableSetAdmin)
-admin.site.register(NRequirements)
+# admin.site.register(NRequirements)
 admin.site.register(Permission)
-admin.site.register(UserProfile)
+# admin.site.register(UserProfile)
