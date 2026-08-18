@@ -82,9 +82,16 @@ footer {
 
 .vis-foreground .vis-group,
 .vis-time-axis .vis-grid.vis-minor,
-.vis-labelset .vis-label,
-.vis-panel.vis-bottom, .vis-panel.vis-center, .vis-panel.vis-left, .vis-panel.vis-right, .vis-panel.vis-top{
-    border-color: var(--bs-border-color) !important;
+.vis-labelset .vis-label {
+    border-color: rgba(var(--bs-body-color-rgb), 0.15) !important;
+}
+
+.vis-panel.vis-center, 
+.vis-panel.vis-left, 
+.vis-panel.vis-right, 
+.vis-panel.vis-top,
+.vis-time-axis .vis-grid.vis-major {
+    border-color: rgba(var(--bs-body-color-rgb), 0.4) !important;
 }
 
 .input-group .form-control {
