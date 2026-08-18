@@ -10,6 +10,7 @@ const $daysDropdownButton = document.getElementById('daysDropdown');
 let timeline = null;
 let items = new vis.DataSet([]);
 let groups = new vis.DataSet([]);
+let start, end;
 
 let DISPLAY_DAYS = 5;
 let BUTTON_SKIP = 2;
@@ -135,12 +136,15 @@ function loadReservables() {
 }
 
 
-function openForm(formUrl = `/reservations/create`) {
+function openForm(formUrl = `/reservations/create?reservableset_slug=${window.RESERVABLE_SET_SLUG}`) {
     // Show modal
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
     // Load form content
-    htmx.ajax('GET', formUrl, $formContainer);
+    htmx.ajax('GET', formUrl, $formContainer).then(() => {
+        // Focus on the first input field since something seems to be stealing it, no idea what...
+        setTimeout(() => $formContainer.querySelector('[autofocus]')?.focus({focusVisible: true}), 400);
+    });
     // Clear on close
     modalElement.addEventListener('hidden.bs.modal', () => {
         $formContainer.innerHTML = '';
@@ -155,7 +159,7 @@ function eventCreated(props, callback) {
     // Immediately destroy the temporary item
     callback(null)
     // Open the creation form
-    openForm(`/reservations/create?start=${props.start.toISOString()}&end=${props.end.toISOString()}&reservables=${props.group}`)
+    openForm(`/reservations/create?start=${props.start.toISOString()}&end=${props.end.toISOString()}&reservables=${props.group}&reservableset_slug=${window.RESERVABLE_SET_SLUG}`)
 }
 
 
@@ -181,18 +185,23 @@ function getRange(centerDate) {
     return [start, end]
 }
 
-function setCalendarDate(centerDate) {
-    const [start, end] = getRange(centerDate)
-
-    // Start loading data
+function loadData() {
     eventSource({
         startStr: start.toISOString(),
         endStr: end.toISOString()
     }, function (events) {
         items.update(events);
+        console.log(`Loaded ${events.length} events from ${start.toISOString()} to ${end.toISOString()}`);
     }, function (error) {
         console.error('Error loading events:', error);
     });
+}
+
+function setCalendarDate(centerDate) {
+    [start, end] = getRange(centerDate);
+
+    // Start loading data
+    loadData();
 
     if (!DONE_LOADING)
         return;

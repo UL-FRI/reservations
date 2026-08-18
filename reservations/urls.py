@@ -5,9 +5,9 @@ from reservations.autocomplete import ReservableAutocomplete, UserAutocomplete
 from reservations.views import (HomeView, NResourcesViewSet,
                                 OldReservableViewSet, OldReservationViewSet,
                                 ReservableSetViewSet, ReservableViewSet,
-                                ReservationCreateView, ReservationDetailView, ReservationUpdateView,
+                                ReservationCreateView, ReservationDeleteView, ReservationDetailView, ReservationUpdateView,
                                 ReservationViewSet, ResourceViewSet,
-                                TimelineView, UserViewSet, login_redirect)
+                                TimelineView, UserView, UserViewSet, login_redirect)
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -29,10 +29,14 @@ urlpatterns = [
     path("", HomeView.as_view()),
     path("timeline/<str:reservable_set_slug>/<str:reservable_type_slug>", TimelineView.as_view(), name="timeline"),
 
+    path("user/<str:pk>/", UserView.as_view(), name="user_detail"),
+
     # Reservation management form
     path("reservations/create", ReservationCreateView.as_view(), name="reservation_create"),
     path("reservations/<int:pk>/", ReservationDetailView.as_view(), name="reservation_detail"),
     path("reservations/<int:pk>/edit", ReservationUpdateView.as_view(), name="reservation_update"),
+    path("reservations/<int:pk>/delete", ReservationDeleteView.as_view(), name="reservation_delete"),
+
 
     # Autocomplete views
     path('autocomplete/user/',UserAutocomplete.as_view(),name='autocomplete-user'),

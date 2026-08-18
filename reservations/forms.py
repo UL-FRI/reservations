@@ -7,7 +7,7 @@ from reservations.models import Reservation
 from reservations.permissions import ReservationPermission
 from rest_framework.exceptions import PermissionDenied
 from django_tomselect.forms import TomSelectModelMultipleChoiceField
-from django_tomselect.app_settings import PluginDropdownHeader, PluginRemoveButton, TomSelectConfig
+from django_tomselect.app_settings import FilterSpec, PluginDropdownHeader, PluginRemoveButton, TomSelectConfig
 from django.utils.translation import gettext_lazy as _
 
 class FormWithRequestMixin:
@@ -64,8 +64,10 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
                 }
             ),
             use_htmx=True,
+            filter_by=("reservableset", "reservableset_set__slug")
         )
     )
+    reservableset = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -78,6 +80,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
                 Column("start"),
                 Column("end"),
             ),
+            "reservableset",
             "owners",
             "reservables",
         )

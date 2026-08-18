@@ -8,9 +8,12 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.http.request import HttpRequest
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.views.generic import DeleteView
 from django.views.generic.base import RedirectView, TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
@@ -147,14 +150,13 @@ class ReservationDetailView(DetailView):
 class ReservationCreateView(GiveFormRequestMixin, CreateView):
     model = Reservation
     form_class = ReservationForm
-
     def form_valid(self, form):
         messages.success(self.request, _('Reservation created successfully.'))
         return super().form_valid(form)
 
     @override
     def get_success_url(self):
-        return reverse('reservation_update', kwargs=dict(pk=self.object.pk, **self.kwargs))
+        return reverse('reservation_detail', kwargs=dict(pk=self.object.pk))
 
     def get_initial(self):
         initial = super().get_initial()
@@ -165,13 +167,12 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
             initial["end"] = datetime.fromisoformat(self.request.GET["end"])
         # Set the initial owners to the current user
         initial["owners"] = [self.request.user.id]
+        # Set the hidden reservableset field for TomSelect to pick up
+        initial["reservableset"] = self.request.GET["reservableset_slug"]
+        # Set the initial reservable if given
+        if "reservables" in self.request.GET:
+            initial["reservables"] = self.request.GET["reservables"]
         return initial
-    
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields["reservables"]
-        return form
-
 
 class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, UpdateView):
     model = Reservation
@@ -183,15 +184,41 @@ class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, Updat
 
     @override
     def get_success_url(self):
-        return self.request.path
+        return reverse('reservation_detail', kwargs=dict(pk=self.object.pk))
 
     def form_valid(self, form):
         messages.success(self.request, _('Reservation updated successfully.'))
         return super().form_valid(form)
 
-class ReservationDeleteView(PermissionRequiredMixin, UpdateView):
+class ReservationDeleteView(PermissionRequiredMixin, DeleteView):
     model = Reservation
     permission_required = 'reservations.delete_reservation'
+    success_url = "/"  # This is ignored
+
+    @override
+    def form_valid(self, form):
+        super().form_valid(form)
+        return HttpResponse(status=204)
+
+class UserView(PermissionRequiredMixin, DetailView):
+    model = User
+    
+    @override
+    def get_object(self, queryset=None):
+        if self.kwargs.get('pk') == 'me':
+            return self.request.user
+        return super().get_object(queryset)
+
+    @override
+    def check_permissions(self, request: HttpRequest):
+        if self.kwargs.get('pk') == 'me' or self.request.user.is_superuser:
+            return None
+        raise PermissionDenied()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        return context
 
 def login_redirect(request):
     # If OIDC is configured, redirect to the OIDC login page

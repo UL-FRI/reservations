@@ -15,8 +15,9 @@
         value="{% trans "Delete" %}" 
         class="btn btn-primary" 
         form="reservationForm"
-        hx-post="/reservations/delete/{{ reservation.pk }}" 
-    >
+        hx-post="{{request.get_full_path}}" 
+        hx-on:htmx:before-request="setTimeout(loadData, 600)" 
+    > <!-- For some reason, after-request or anything else doesn't trigger, so we bind on before-request and wait. I know... :'( -->
 {% endblock %}
 
 {% block extra_js %}

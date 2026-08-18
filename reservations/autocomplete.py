@@ -8,8 +8,10 @@ from django_tomselect.autocompletes import AutocompleteModelView
 
 class ReservableAutocomplete(AutocompleteModelView):
     model = Reservable
-    search_lookups = ["name__icontains", "slug__icontains"]
+    search_lookups = ["name__icontains", "slug__icontains", "type__icontains"]
     value_fields = ["id", "type", "name"]
+    filter_by = ["reservableset"]
+    ordering = ["type", "order"]
         
     def hook_queryset(self, queryset):
         return get_objects_for_user(self.request.user, "reserve", super().hook_queryset(queryset))
