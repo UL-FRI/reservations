@@ -24,7 +24,9 @@
 {% endblock %}
 
 {% block content %}
+{% if user.is_authenticated %}
 <button class="btn btn-primary" id="add-btn" onclick="openForm()">+</button>
+{% endif %}
 <!-- Timeline Container -->
 <div id="timeline-container"></div>
 {% endblock %}

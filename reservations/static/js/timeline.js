@@ -71,8 +71,6 @@ function initTimeline() {
         end: end,
     };
 
-    console.debug(options)
-
     // Create the timeline
     timeline = new vis.Timeline($container, items, groups, options);
 
