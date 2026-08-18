@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_admin_listfilter_dropdown",
     "rest_framework",
     "import_export",
     "crispy_forms",

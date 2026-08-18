@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Permission
 from adminsortable2.admin import SortableAdminMixin
 from guardian.admin import GuardedModelAdmin
+from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
 from reservations.merge import merge_reservables
 from reservations.models import NRequirements, NResources, Reservable, ReservableSet, Reservation, Resource, UserProfile
@@ -16,7 +17,7 @@ class StudentAdmin(admin.ModelAdmin):
 class ReservationAdmin(GuardedModelAdmin):
     search_fields = ("reason",)
     list_display = ("reason", "start", "end", "_reservables")
-    list_filter = ("reservables__type", "reservables__reservableset_set", "reservables", "importbatch")
+    list_filter = ("reservables__type", "reservables__reservableset_set", ("reservables", RelatedDropdownFilter), ("importbatch", RelatedDropdownFilter))
     raw_id_fields = ("reservables", "owners")
 
     def _reservables(self, obj):
