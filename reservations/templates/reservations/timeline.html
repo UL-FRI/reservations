@@ -10,9 +10,9 @@
     <div class="btn-group">
         <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="daysDropdown" data-bs-toggle="dropdown" aria-expanded="false">1d</button>
         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="daysDropdown">
-            <li><a class="dropdown-item days-option" href="#" data-days="1">1 day</a></li>
-            <li><a class="dropdown-item days-option" href="#" data-days="3">3 days</a></li>
-            <li><a class="dropdown-item days-option" href="#" data-days="5">5 days</a></li>
+            <li><a class="dropdown-item days-option" href="#" data-days="1">{% blocktranslate count count=1 %}{{ count }} day{% plural %}{{ count }} days{% endblocktranslate %}</a></li>
+            <li><a class="dropdown-item days-option" href="#" data-days="3">{% blocktranslate count count=3 %}{{ count }} day{% plural %}{{ count }} days{% endblocktranslate %}</a></li>
+            <li><a class="dropdown-item days-option" href="#" data-days="5">{% blocktranslate count count=5 %}{{ count }} day{% plural %}{{ count }} days{% endblocktranslate %}</a></li>
         </ul>
     </div>
     <div class="input-group input-group-sm">

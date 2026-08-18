@@ -1,0 +1,314 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-18 16:21+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100>=3 && "
+"n%100<=4 ? 2 : 3);\n"
+"X-Generator: Poedit 3.9\n"
+
+#: reservations/apps.py:16 reservations/templates/reservations/base.html:8
+msgid "Reservations"
+msgstr "Rezervacije"
+
+#: reservations/forms.py:32
+msgid "Start Time"
+msgstr ""
+
+#: reservations/forms.py:33
+msgid "End Time"
+msgstr ""
+
+#: reservations/forms.py:35
+msgid "Owners"
+msgstr "Lastniki"
+
+#: reservations/forms.py:36
+msgid "These users will be able to modify this reservation later"
+msgstr "Ti uporabniki bodo lahko kasneje spreminjali to rezervacijo"
+
+#: reservations/forms.py:41
+msgid "Search for users..."
+msgstr ""
+
+#: reservations/forms.py:50
+msgid "Reservables"
+msgstr "Predmeti rezervacije"
+
+#: reservations/forms.py:51
+msgid "Classrooms, teachers or other objects, which this reservation targets"
+msgstr ""
+"Učilnice, predavatelji in drugi objekti, na katere je vezana ta rezervacija"
+
+#: reservations/forms.py:56
+msgid "Search for reservables..."
+msgstr "Iskanje možnih predmetov rezervacije..."
+
+#: reservations/forms.py:63
+msgid "Type"
+msgstr ""
+
+#: reservations/forms.py:95
+msgid "End time must be after start time."
+msgstr ""
+
+#: reservations/models.py:30
+msgid "ReservableSet name"
+msgstr "Ime množice"
+
+#: reservations/models.py:32
+msgid "ReservableSet model is used to group common reservables together."
+msgstr ""
+"ReservableSet predstavlja množico objektov, ki jih je mogoče rezervirati."
+
+#: reservations/models.py:58
+msgid "The type of the resource."
+msgstr ""
+
+#: reservations/models.py:85
+msgid "countable resource"
+msgstr ""
+
+#: reservations/models.py:86
+msgid "countable resources"
+msgstr ""
+
+#: reservations/models.py:115
+msgid "reservable"
+msgstr "predmet rezervacije"
+
+#: reservations/models.py:116 reservations/models.py:226
+msgid "reservables"
+msgstr "predmeti rezervacije"
+
+#: reservations/models.py:137
+msgid "countable requirement"
+msgstr "števna zahteva"
+
+#: reservations/models.py:138
+msgid "countable requirements"
+msgstr "števne zahteve"
+
+#: reservations/models.py:204
+msgid "External reservation ID"
+msgstr "Zunanji ID rezervacije"
+
+#: reservations/models.py:205
+msgid "ID from Wyse Timetables (WTT3) API"
+msgstr "ID iz sistema WTT3"
+
+#: reservations/models.py:210
+msgid "A reason for the reservation."
+msgstr "Razlog za rezervacijo."
+
+#: reservations/models.py:214
+msgid "A start time of the reservation"
+msgstr "Začetni čas rezervacije"
+
+#: reservations/models.py:217
+msgid "An end time of the reservation"
+msgstr "Končni čas rezervacije"
+
+#: reservations/models.py:221
+msgid "The reservation owners"
+msgstr "Lastniki rezervacije"
+
+#: reservations/models.py:233
+msgid "resources"
+msgstr "viri"
+
+#: reservations/models.py:234
+msgid "Reservation requirements"
+msgstr "Zahteve rezervacije"
+
+#: reservations/models.py:248
+msgid "reservation"
+msgstr "rezervacija"
+
+#: reservations/models.py:249
+msgid "reservations"
+msgstr "rezervacije"
+
+#: reservations/permissions.py:56
+msgid "Must be owner to modify the resevation."
+msgstr "Morate biti lastnik rezervacije, da jo lahko urejate."
+
+#: reservations/permissions.py:91
+msgid "Insufficient privileges on reservables."
+msgstr "Nezadostne pravice na objektih rezervacije."
+
+#: reservations/permissions.py:131
+msgid "No double booking permission."
+msgstr "Nimate pravice za dvojno rezerviranje."
+
+#: reservations/templates/reservations/base.html:25
+#: reservations/templates/reservations/reservableset_list.html:5
+msgid "FRIzervacije"
+msgstr "FRIzervacije"
+
+#: reservations/templates/reservations/base.html:41
+msgid "Log out"
+msgstr "Odjava"
+
+#: reservations/templates/reservations/base.html:46
+#: reservations_site/templates/registration/login.html:14
+msgid "Login"
+msgstr "Prijava"
+
+#: reservations/templates/reservations/base.html:69
+msgid "FRI Reservations"
+msgstr "FRI Rezervacije"
+
+#: reservations/templates/reservations/modal_base.html:7
+msgid "Close"
+msgstr "Zapri"
+
+#: reservations/templates/reservations/reservableset_list.html:9
+msgid "Welcome to FRIzervacije!"
+msgstr "Dobrodošli na FRIzervacijah!"
+
+#: reservations/templates/reservations/reservableset_list.html:11
+msgid "These are the ReservableSets on this instance:"
+msgstr "To so razpoložljive skupine rezervacij na tej instanci:"
+
+#: reservations/templates/reservations/reservation_delete.html:5
+msgid "Delete Reservation"
+msgstr "Izbriši rezervacijo"
+
+#: reservations/templates/reservations/reservation_delete.html:15
+#: reservations/templates/reservations/reservation_detail.html:48
+msgid "Delete"
+msgstr "Izbriši"
+
+#: reservations/templates/reservations/reservation_detail.html:3
+msgid "Reservation details"
+msgstr "Podrobnosti rezervacije"
+
+#: reservations/templates/reservations/reservation_detail.html:7
+msgid "Reason"
+msgstr "Razlog"
+
+#: reservations/templates/reservations/reservation_detail.html:13
+msgid "From"
+msgstr "Od"
+
+#: reservations/templates/reservations/reservation_detail.html:17
+msgid "To"
+msgstr "Do"
+
+#: reservations/templates/reservations/reservation_detail.html:24
+msgid "Reserved by"
+msgstr "Rezerviral"
+
+#: reservations/templates/reservations/reservation_detail.html:47
+msgid "Edit"
+msgstr "Uredi"
+
+#: reservations/templates/reservations/reservation_form.html:5
+msgid "Create Reservation"
+msgstr "Ustvari rezervacijo"
+
+#: reservations/templates/reservations/reservation_form.html:15
+msgid "Save"
+msgstr "Shrani"
+
+#: reservations/templates/reservations/timeline.html:6
+msgid "Reservations Calendar"
+msgstr "Koledar rezervacij"
+
+#: reservations/templates/reservations/timeline.html:13
+#: reservations/templates/reservations/timeline.html:14
+#: reservations/templates/reservations/timeline.html:15
+#, python-format
+msgid "%(count)s day"
+msgid_plural "%(count)s days"
+msgstr[0] "%(count)s dan"
+msgstr[1] "%(count)s dan"
+msgstr[2] "%(count)s dni"
+msgstr[3] "%(count)s dni"
+
+#: reservations/views.py:152
+msgid "Reservation created successfully."
+msgstr "Rezervacija uspešno ustvarjena."
+
+#: reservations/views.py:189
+msgid "Reservation updated successfully."
+msgstr "Rezervacija uspešno posodobljena."
+
+#: reservations_connect/metronik/apps.py:7
+msgid "Reservations Connect: Metronik"
+msgstr ""
+
+#: reservations_site/templates/registration/login.html:6
+msgid "Login with UL"
+msgstr "Prijava z UL"
+
+#: reservations_site/templates/registration/login.html:9
+msgid ""
+"The form below is meant for administrator access. Users should use the "
+"Single-Sign-On options above!"
+msgstr ""
+"Spodnji obrazec je namenjen administratorjem. Uporabniki se morajo prijaviti "
+"z gumbom za enotno prijavo zgoraj!"
+
+#~ msgid "reason"
+#~ msgstr "razlog"
+
+#~ msgid "start"
+#~ msgstr "začetek"
+
+#~ msgid "end"
+#~ msgstr "konec"
+
+#~ msgid "Django site admin"
+#~ msgstr "Django administracija strani"
+
+#~ msgid "Django administration"
+#~ msgstr "Django administracija"
+
+#, python-format
+#~ msgid "Make a POST request on the %(name)s resource"
+#~ msgstr "Ustvari novo rezervacijo tipa %(name)s"
+
+#~ msgid "POST"
+#~ msgstr "Ustvari"
+
+#, python-format
+#~ msgid "Make a PUT request on the %(name)s resource"
+#~ msgstr "Posodobi obstoječo rezervacijo tipa %(name)s"
+
+#~ msgid "Update"
+#~ msgstr "Posodobi"
+
+#, python-format
+#~ msgid "Make a DELETE request on the %(name)s resource"
+#~ msgstr "Izbriši obstoječo rezervacijo tipa %(name)s"
+
+#~ msgid "DELETE"
+#~ msgstr "Izbriši"
+
+#~ msgid "PUT"
+#~ msgstr "Posodobi"
+
+#~ msgid "Please login"
+#~ msgstr "Prijavite se"
+
+#~ msgid "Double booking not allowed"
+#~ msgstr "Dvojna rezervacija ni dovoljena"
+
+#~ msgid "Room"
+#~ msgstr "Soba"
+
+#~ msgid "end time"
+#~ msgstr "konec"
+
+#~ msgid "Reservables reserved by the reservation"
+#~ msgstr "Reservables na tej rezervaciji"
