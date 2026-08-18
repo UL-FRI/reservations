@@ -29,15 +29,16 @@ class ActuallyWorkingDateTimeField(forms.DateTimeField):
 
 
 class ReservationForm(FormWithRequestMixin, forms.ModelForm):
-    start = ActuallyWorkingDateTimeField(label='Start Time')
-    end = ActuallyWorkingDateTimeField(label='End Time')
+    start = ActuallyWorkingDateTimeField(label=_('Start Time'))
+    end = ActuallyWorkingDateTimeField(label=_('End Time'))
     owners = TomSelectModelMultipleChoiceField(
+        label=_('Owners'),
         help_text=_("These users will be able to modify this reservation later"),
         config=TomSelectConfig(
             url="autocomplete-user",
             value_field="id",
             label_field="full_name",
-            placeholder="Search for users...",
+            placeholder=_("Search for users..."),
             minimum_query_length=1,
             preload="focus",
             close_after_select=True,
@@ -46,19 +47,20 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
         )
     )
     reservables = TomSelectModelMultipleChoiceField(
+        label=_('Reservables'),
         help_text=_("Classrooms, teachers or other objects, which this reservation targets"),
         config=TomSelectConfig(
             url="autocomplete-reservable",
             value_field="id",
             label_field="name",
-            placeholder="Search for reservables...",
+            placeholder=_("Search for reservables..."),
             minimum_query_length=1,
             preload="focus",
             close_after_select=True,
             plugin_remove_button=PluginRemoveButton(),
             plugin_dropdown_header=PluginDropdownHeader(
                 extra_columns={
-                    "type": "Type"
+                    "type": _("Type")
                 }
             ),
             use_htmx=True,
@@ -90,7 +92,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
         start = cleaned_data.get('start')
         end = cleaned_data.get('end')
         if start and end and start > end:
-            self.add_error('end', 'End time must be after start time.')
+            self.add_error('end', _('End time must be after start time.'))
 
         # Run permission checks and turn permission errors into form error for display
         try:

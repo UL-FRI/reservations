@@ -207,18 +207,18 @@ class Reservation(models.Model):
 
     #: Why the reservation was made.
     reason = models.CharField(
-        max_length=255, verbose_name=_("A reason for the reservation.")
+        max_length=255, help_text=_("A reason for the reservation.")
     )
 
     #: Start of the reservation.
-    start = models.DateTimeField(verbose_name=_("A start time of the reservation"))
+    start = models.DateTimeField(help_text=_("A start time of the reservation"))
 
     #: End of the reservation.
-    end = models.DateTimeField(verbose_name=_("An end time of the reservation"))
+    end = models.DateTimeField(help_text=_("An end time of the reservation"))
 
     #: Owners of the reservation.
     owners = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, verbose_name=_("The reservation owners")
+        settings.AUTH_USER_MODEL, help_text=_("The reservation owners")
     )
 
     #: Reservables in the reservation.
