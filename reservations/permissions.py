@@ -37,7 +37,7 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
 
         :raises PermissionDenied: when reservation can not be created / updated.
         """
-        reservables = ListWithAll(validated_data["reservables"])
+        reservables = ListWithAll(validated_data.get("reservables", []))
         # Users with manage permission on reservables can always reserve them.
         if self.check_manage_permissions(reservables, user):
             return
