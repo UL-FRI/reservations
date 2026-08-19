@@ -39,10 +39,10 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
         """
         reservables = ListWithAll(validated_data.get("reservables", []))
         # Users with manage permission on reservables can always reserve them.
-        if self.check_manage_permissions(reservables, user):
+        if self.has_manage_permissions(reservables, user):
             return
 
-        self.has_reservables_permissions(reservables, user)
+        self.check_reservables_permissions(reservables, user)
 
         start = validated_data["start"]
         end = validated_data["end"]
@@ -77,21 +77,21 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
         self.can_create_update(serializer.validated_data, request.user, reservation)
         return True
 
-    def has_reservables_permissions(self, reservables: models.QuerySet | ListWithAll, user):
+    def check_reservables_permissions(self, reservables: models.QuerySet | ListWithAll, user):
         """Does user have reserve permissions on all reservables.
 
         :raise PermissionDenied: when user has no permission on at least one reservable.
         """
         checker = ObjectPermissionChecker(user)
         if any(
-            not checker.has_perm("manage_reservations", reservable)
+            not checker.has_perm("reserve", reservable)
             for reservable in reservables.all()
         ):
             raise exceptions.PermissionDenied(
                 detail=_("Insufficient privileges on reservables.")
             )
 
-    def check_manage_permissions(self, reservables: models.QuerySet | ListWithAll, user) -> bool:
+    def has_manage_permissions(self, reservables: models.QuerySet | ListWithAll, user) -> bool:
         """Does user have manage permissions on all reservables."""
         checker = ObjectPermissionChecker(user)
         return all(
