@@ -20,6 +20,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from django_tomselect.app_settings import TomSelectConfig
 from guardian.mixins import PermissionRequiredMixin
+from guardian.shortcuts import assign_perm
 from reservations.filters import (NResourcesFilter, ReservableFilter,
                                   ReservableSetFilter, ReservationFilter,
                                   ResourceFilter)
@@ -150,9 +151,14 @@ class ReservationDetailView(DetailView):
 class ReservationCreateView(GiveFormRequestMixin, CreateView):
     model = Reservation
     form_class = ReservationForm
+    
     def form_valid(self, form):
         messages.success(self.request, _('Reservation created successfully.'))
-        return super().form_valid(form)
+        resp = super().form_valid(form)
+        # User who created the reservation should have permission to edit and delete it
+        assign_perm('reservations.change_reservation', self.request.user, self.object)
+        assign_perm('reservations.delete_reservation', self.request.user, self.object)
+        return resp
 
     @override
     def get_success_url(self):
@@ -177,7 +183,6 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
 class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, UpdateView):
     model = Reservation
     form_class = ReservationForm
-    
     
     def get_required_permissions(self, request: Optional[HttpRequest] = None) -> list[str]:
         return ['reservations.change_reservation']
