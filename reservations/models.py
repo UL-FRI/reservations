@@ -155,7 +155,7 @@ class ReservationManager(models.Manager):
     def overlapping(self, start: datetime, end: datetime, reservables: models.QuerySet):
         """Return the set of overlapping reservations for reservables."""
         return Reservation.objects.filter(
-            start__lt=end, end=start, reservables__in=reservables.all()
+            start__lt=end, end__gt=start, reservables__in=reservables.all()
         )
 
     def import_from_wtt3(
