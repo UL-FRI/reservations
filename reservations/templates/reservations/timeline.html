@@ -1,0 +1,68 @@
+{% extends 'reservations/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load django_tomselect %}
+
+{% block title %}{% trans "Reservations Calendar" %}{% endblock %}
+
+{% block nav_middle %}
+<div class="gap-2 d-flex align-items-center" id="date-picker-container">
+    <div class="btn-group">
+        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="daysDropdown" data-bs-toggle="dropdown" aria-expanded="false">1d</button>
+        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="daysDropdown">
+            <li><a class="dropdown-item days-option" href="#" data-days="1">{% blocktranslate count count=1 %}{{ count }} day{% plural %}{{ count }} days{% endblocktranslate %}</a></li>
+            <li><a class="dropdown-item days-option" href="#" data-days="3">{% blocktranslate count count=3 %}{{ count }} day{% plural %}{{ count }} days{% endblocktranslate %}</a></li>
+            <li><a class="dropdown-item days-option" href="#" data-days="5">{% blocktranslate count count=5 %}{{ count }} day{% plural %}{{ count }} days{% endblocktranslate %}</a></li>
+        </ul>
+    </div>
+    <div class="input-group input-group-sm">
+        <button class="btn btn-outline-light" type="button" id="prev-date-btn">⏴</button>
+        <input type="date" class="form-control" id="calendar-date" />
+        <button class="btn btn-outline-light" type="button" id="next-date-btn">⏵</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<button class="btn btn-primary" id="add-btn" onclick="openForm()">+</button>
+{% endif %}
+<!-- Timeline Container -->
+<div id="timeline-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Reservation Modal -->
+<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-lg">    
+        <div id="reservationModalInside" class="htmxTarget"></div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 600px) {
+    .navbar-brand {
+        display: none;
+    }
+}
+body > main {
+    position: relative;
+}
+#add-btn {
+    z-index: 10;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+}
+</style>
+
+<script>
+window.RESERVABLE_SET_SLUG = "{{ reservable_set_slug }}"
+window.RESERVABLE_TYPE_SLUG = "{{ reservable_type_slug }}"
+window.IS_LOGGED_IN = {{ user.is_authenticated|lower }}
+</script>
+
+<script type="text/javascript" src="https://unpkg.com/vis-timeline@8.1.0/standalone/umd/vis-timeline-graph2d.min.js"></script>
+<script src="{% static 'js/timeline.js' %}"></script>
+{% tomselect_media css_framework="bootstrap5" %}
+{% endblock %}

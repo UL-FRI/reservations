@@ -1,0 +1,28 @@
+{% extends "reservations/auto_base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Reservation" %}{% endblock %}
+
+{% block contained %}
+{% crispy form %}
+{% endblock %}
+
+{% block modal_footer %}
+    <input 
+        type="submit" 
+        name="submit" 
+        value="{% trans "Save" %}" 
+        class="btn btn-primary" 
+        form="reservationForm"
+        hx-post="{{request.get_full_path}}" 
+        hx-on:htmx:before-request="setTimeout(loadData, 600)" 
+    > <!-- For some reason, after-request or anything else doesn't trigger, so we bind on before-request and wait. I know... :'( -->  
+{% endblock %}
+
+{% block extra_js %}
+    {% if not request.htmx %}
+        {% load django_tomselect %}
+        {% tomselect_media css_framework="bootstrap5" %}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "reservations/auto_base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Reservation details" %}{% endblock %}
+
+{% block contained %}
+<dl class="row">
+    <dt>{% trans "Reason" %}</dt>
+    <dd>{{ reservation.reason }}</dd>
+</dl>
+
+<dl class="row">
+    <div class="col">
+        <dt>{% trans "From" %}</dt>
+        <dd>{{ reservation.start }}</dd>
+    </div>
+    <div class="col">
+        <dt>{% trans "To" %}</dt>
+        <dd>{{ reservation.end }}</dd>
+    </div>
+</dl>
+
+{% if reservation.owners.exists %}
+<dl class="row">
+    <dt>{% trans "Reserved by" %}</dt>
+    <dd>{% for owner in reservation.owners.all %}{{ reservation.owners }}{% if not loop.last %},{% endif %}{% endfor %}</dd>
+</dl>
+{% endif %}
+
+<dl class="row">
+{% for type, reservables in reservables_by_type.items %}
+<div class="col">
+    <dt>{{ type }}</dt>
+    <dd>
+        <ul class="list-group">
+            {% for reservable in reservables %}
+                <li class="list-group-item">{{ reservable.name }}</li>
+            {% endfor %}
+        </ul>
+    </dd>
+</div>
+{% endfor %}
+</dl>
+{% endblock %}
+
+{% if can_edit %}
+    {% block modal_footer %}
+        <a hx-get="{% url 'reservation_update' reservation.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+        <a hx-get="{% url 'reservation_delete' reservation.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
+    {% endblock %}
+{% endif %}

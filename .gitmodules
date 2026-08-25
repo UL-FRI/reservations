@@ -1,0 +1,3 @@
+[submodule "reservations_connect"]
+	path = reservations_connect
+	url = https://git.fri.uni-lj.si/rc/reservations_connect.git

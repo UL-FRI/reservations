@@ -1,0 +1,38 @@
+{% extends 'reservations/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "User:" %} {{object.username}}{% endblock %}
+
+{% block contained %}
+<h2>{% trans "User details" %}</h2>
+<dl>
+    <dt>{% trans "ID" %}</dt>
+    <dd>{{ object.pk }}</dd>
+    <dt>{% trans "First name" %}</dt>
+    <dd>{{ object.first_name }}</dd>
+    <dt>{% trans "Last name" %}</dt>
+    <dd>{{ object.last_name }}</dd>
+    <dt>{% trans "Username" %}</dt>
+    <dd>{{ object.username }}</dd>
+    <dt>{% trans "Email" %}</dt>
+    <dd>{{ object.email }}</dd>
+    <dt>{% trans "Superuser?" %}</dt>
+    <dd>{{ object.is_superuser }}</dd>
+</dl>
+
+<h2>{% trans "Groups" %}</h2>
+{% for group in object.groups.all %}
+    <h3>{{ group.name }}</h3>
+    <ul>
+        {% for permission in group.permissions.all %}
+            <li>{{ permission.name }} (<code>{{ permission.codename }}</code>)</li>
+        {% empty %}
+            <li>{% trans "No permissions" %}</li>
+        {% endfor %}
+    </ul>
+{% empty %}
+    <p>{% trans "No groups" %}</p>
+{% endfor %}
+
+{% endblock %}

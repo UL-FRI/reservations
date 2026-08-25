@@ -7,3 +7,9 @@ launch.json
 
 # Local database
 db.sqlite3
+
+# Secrets
+.env
+
+# Compiled files
+*.mo
