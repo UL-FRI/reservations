@@ -5,6 +5,7 @@ from django.contrib.auth.models import Permission
 from adminsortable2.admin import SortableAdminMixin
 from guardian.admin import GuardedModelAdmin
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
+from import_export.admin import ImportExportMixin
 
 from reservations.merge import merge_reservables
 from reservations.models import NRequirements, NResources, Reservable, ReservableSet, Reservation, Resource, UserProfile
@@ -24,7 +25,7 @@ class ReservationAdmin(GuardedModelAdmin):
         return super().get_queryset(request).prefetch_related("reservables")
 
 
-class ReservableAdmin(SortableAdminMixin, GuardedModelAdmin):
+class ReservableAdmin(SortableAdminMixin, ImportExportMixin, GuardedModelAdmin):
     search_fields = ("name", "slug")
     list_display = ("order", "name", "type", "_reservablesets")
     list_filter = ("type", "reservableset_set")
@@ -72,6 +73,7 @@ class ReservableAdmin(SortableAdminMixin, GuardedModelAdmin):
             class ForeignReservableInline(admin.TabularInline):
                 model = _model
                 extra = 0
+                readonly_fields = ("id",)
 
             ForeignReservableInline.__name__ = f"{_model.__name__}Inline"
             inlines.append(ForeignReservableInline)
