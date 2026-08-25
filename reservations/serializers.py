@@ -52,6 +52,8 @@ class ReservationSerializer(serializers.ModelSerializer):
             "owners",
             "reservables",
             "requirements",
+            "created_at",
+            "updated_at",
             "id",
             "url",
         ]

@@ -125,6 +125,48 @@ class PermissionTests(ReservationTestDataMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
 
     #
+    # CREATED / UPDATED TIMESTAMPS
+    #
+
+    def test_reservation_created_and_updated_timestamps(self):
+        self.client.force_authenticate(user=self.profesor)
+        response = self.client.post(
+            "/api/reservations/",
+            {
+                "start": "2024-06-02T10:00:00Z",
+                "end": "2024-06-02T11:00:00Z",
+                "reason": "Timestamp test",
+                "reservables": [self.p22.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
+        self.assertIsNotNone(response.data["created_at"])
+        self.assertIsNotNone(response.data["updated_at"])
+
+        reservation = Reservation.objects.get(pk=response.data["id"])
+        # Ownership isn't settable through the (read-only) API "owners" field; add it
+        # directly so the subsequent update is permitted.
+        reservation.owners.add(self.profesor)
+        created_at = reservation.created_at
+        updated_at = reservation.updated_at
+
+        response = self.client.patch(
+            f"/api/reservations/{reservation.id}/",
+            {
+                "reason": "Timestamp test, updated",
+                "start": "2024-06-02T10:00:00Z",
+                "end": "2024-06-02T11:00:00Z",
+                "reservables": [self.p22.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        reservation.refresh_from_db()
+        self.assertEqual(reservation.created_at, created_at)
+        self.assertGreater(reservation.updated_at, updated_at)
+
+    #
     # EDITING A MULTI-RESERVABLE RESERVATION (regression test)
     #
 

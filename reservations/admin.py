@@ -12,9 +12,10 @@ from reservations_connect.models import ForeignReservable
 
 class ReservationAdmin(GuardedModelAdmin):
     search_fields = ("reason",)
-    list_display = ("reason", "start", "end", "_reservables")
+    list_display = ("reason", "start", "end", "_reservables", "created_at", "updated_at")
     list_filter = ("reservables__type", "reservables__reservableset_set", "start", ("reservables", RelatedDropdownFilter), ("importbatch", RelatedDropdownFilter))
     raw_id_fields = ("reservables", "owners")
+    readonly_fields = ("created_at", "updated_at")
 
     def _reservables(self, obj):
         return ", ".join(r.name for r in obj.reservables.all())

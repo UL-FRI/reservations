@@ -19,6 +19,17 @@
     </div>
 </dl>
 
+<dl class="row">
+    <div class="col">
+        <dt>{% trans "Created" %}</dt>
+        <dd>{{ reservation.created_at }}</dd>
+    </div>
+    <div class="col">
+        <dt>{% trans "Last updated" %}</dt>
+        <dd>{{ reservation.updated_at }}</dd>
+    </div>
+</dl>
+
 {% if reservation.owners.exists %}
 <dl class="row">
     <dt>{% trans "Reserved by" %}</dt>

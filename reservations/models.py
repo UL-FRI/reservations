@@ -216,6 +216,12 @@ class Reservation(models.Model):
     #: End of the reservation.
     end = models.DateTimeField(help_text=_("An end time of the reservation"))
 
+    #: When the reservation was created.
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    #: When the reservation was last updated.
+    updated_at = models.DateTimeField(auto_now=True)
+
     #: Owners of the reservation.
     owners = models.ManyToManyField(
         settings.AUTH_USER_MODEL, help_text=_("The reservation owners")
