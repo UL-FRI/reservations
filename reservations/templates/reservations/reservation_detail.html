@@ -22,7 +22,7 @@
 {% if reservation.owners.exists %}
 <dl class="row">
     <dt>{% trans "Reserved by" %}</dt>
-    <dd>{% for owner in reservation.owners.all %}{{ reservation.owners }}{% if not loop.last %},{% endif %}{% endfor %}</dd>
+    <dd>{% for owner in reservation.owners.all %}{{ owner }}{% if not forloop.last %},{% endif %}{% endfor %}</dd>
 </dl>
 {% endif %}
 
