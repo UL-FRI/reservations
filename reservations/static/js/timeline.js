@@ -190,6 +190,11 @@ function loadData() {
         startStr: start.toISOString(),
         endStr: end.toISOString()
     }, function (events) {
+        // Drop items that used to be in this range but are no longer returned
+        // (e.g. the reservation was deleted, or edited to drop a reservable).
+        const newIds = new Set(events.map(event => event.id));
+        const staleIds = items.getIds().filter(id => !newIds.has(id));
+        items.remove(staleIds);
         items.update(events);
         console.log(`Loaded ${events.length} events from ${start.toISOString()} to ${end.toISOString()}`);
     }, function (error) {
