@@ -102,9 +102,17 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
         if start and end and start > end:
             self.add_error('end', _('End time must be after start time.'))
 
-        # Run permission checks and turn permission errors into form error for display
+        # Run permission checks and turn permission errors into form error for display.
+        # Skip this when start/end failed validation above: add_error() removes them
+        # from cleaned_data, and can_create_update() requires both to be present.
+        if 'start' not in cleaned_data or 'end' not in cleaned_data:
+            return cleaned_data
+
+        # self.instance is unsaved (pk is None) when creating, so only pass it as the
+        # existing reservation when we're actually updating one.
+        existing_reservation = self.instance if self.instance and self.instance.pk else None
         try:
-            ReservationPermission().can_create_update(cleaned_data, self.request.user)
+            ReservationPermission().can_create_update(cleaned_data, self.request.user, existing_reservation)
         except PermissionDenied as e:
             self.add_error(None, str(e))
         

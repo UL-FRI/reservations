@@ -57,7 +57,7 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
                 )
 
             # Remove the existing reservation from the overlapping set.
-            overlapping_reservations.exclude(pk=reservation.pk)
+            overlapping_reservations = overlapping_reservations.exclude(pk=reservation.pk)
 
         if overlapping_reservations.exists():
             self.can_overlap(overlapping_reservations, reservables, user)
