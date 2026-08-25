@@ -20,6 +20,7 @@ class ReservationTestDataMixin:
 
     @classmethod
     def setUpTestData(cls):
+        # Create users and groups. Both professors can reserve; only prof2 can double-reserve.
         cls.group_fri_prof = Group.objects.create(name="fri_prof")
         cls.profesor = User.objects.create(
             first_name="Profesor",
@@ -27,7 +28,14 @@ class ReservationTestDataMixin:
             email="prof@fri.uni-lj.si",
             username="prof@fri.uni-lj.si",
         )
+        cls.profesor2 = User.objects.create(
+            first_name="Profesor",
+            last_name="Pametnejši",
+            email="prof2@fri.uni-lj.si",
+            username="prof2@fri.uni-lj.si",
+        )
         cls.profesor.groups.add(cls.group_fri_prof)
+        cls.profesor2.groups.add(cls.group_fri_prof)
         cls.student = User.objects.create(
             first_name="Študent",
             last_name="Glupi",
@@ -44,6 +52,7 @@ class ReservationTestDataMixin:
         cls.pa = Reservable.objects.create(name="PA", slug="PA", type="classroom")
         cls.pa.reservableset_set.add(cls.fri, cls.fkkt)
 
+        # Set up permissions (both profs can reserve, only prof2 can double-reserve)
         for codename in (
             "view_reservable",
             "view_reservation",
@@ -56,8 +65,10 @@ class ReservationTestDataMixin:
             )
 
         assign_perm("reserve", cls.group_fri_prof, cls.fri.reservables.all())
+        assign_perm("double_reserve", cls.profesor2, cls.fri.reservables.all())
 
-        # Reservation created (and permissioned) the way ReservationCreateView would do it.
+        # Create some sample reservations, with ownership/edit rights set up the way
+        # ReservationCreateView would set them up for a real user-created reservation.
         cls.r1 = Reservation.objects.create(
             start="2024-06-03T10:00:00Z", end="2024-06-03T11:00:00Z", reason="Reservation 1"
         )
@@ -65,6 +76,14 @@ class ReservationTestDataMixin:
         cls.r1.owners.add(cls.profesor)
         assign_perm("reservations.change_reservation", cls.profesor, cls.r1)
         assign_perm("reservations.delete_reservation", cls.profesor, cls.r1)
+
+        cls.r2 = Reservation.objects.create(
+            start="2024-06-04T10:00:00Z", end="2024-06-04T11:00:00Z", reason="Reservation 2"
+        )
+        cls.r2.reservables.add(cls.pa)
+        cls.r2.owners.add(cls.profesor2)
+        assign_perm("reservations.change_reservation", cls.profesor2, cls.r2)
+        assign_perm("reservations.delete_reservation", cls.profesor2, cls.r2)
 
 
 class PermissionTests(ReservationTestDataMixin, APITestCase):
@@ -89,7 +108,7 @@ class PermissionTests(ReservationTestDataMixin, APITestCase):
             f"/api/reservations/?reservables__reservableset_set__slug={self.fri.slug}&start__gte={test_week[0]}&end__lte={test_week[1]}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(len(response.data["results"]), 2)
 
     def test_profesor_create_reservation(self):
         self.client.force_authenticate(user=self.profesor)
@@ -135,6 +154,72 @@ class PermissionTests(ReservationTestDataMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(list(reservation.reservables.values_list("id", flat=True)), [self.p22.id])
 
+    #
+    # DOUBLE-RESERVING
+    #
+
+    def test_profesor_double_reserve(self):
+        self.client.force_authenticate(user=self.profesor)
+        response = self.client.post(
+            "/api/reservations/",
+            {
+                "start": "2024-06-03T10:30:00Z",
+                "end": "2024-06-03T11:30:00Z",
+                "reason": "Testing double booking",
+                "reservables": [self.p22.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
+        self.assertContains(response, "No double booking", status_code=status.HTTP_403_FORBIDDEN)
+
+        self.client.force_authenticate(user=self.profesor2)
+        response = self.client.post(
+            "/api/reservations/",
+            {
+                "start": "2024-06-03T10:30:00Z",
+                "end": "2024-06-03T11:30:00Z",
+                "reason": "Testing double booking",
+                "reservables": [self.p22.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
+
+    def test_profesor_update_to_overlap_denied(self):
+        """Professor without double_reserve should not be able to move a reservation onto another's slot."""
+        self.client.force_authenticate(user=self.profesor)
+        response = self.client.patch(
+            f"/api/reservations/{self.r1.id}/",
+            {
+                "reason": "Moved into r2's slot",
+                "start": "2024-06-04T10:30:00Z",
+                "end": "2024-06-04T11:30:00Z",
+                "reservables": [self.pa.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
+        self.r1.refresh_from_db()
+        self.assertEqual(self.r1.reason, "Reservation 1")
+
+    def test_profesor2_update_to_overlap_allowed(self):
+        """Professor with double_reserve should be able to move a reservation onto another's slot."""
+        self.client.force_authenticate(user=self.profesor2)
+        response = self.client.patch(
+            f"/api/reservations/{self.r2.id}/",
+            {
+                "reason": "Moved into r1's slot",
+                "start": "2024-06-03T10:30:00Z",
+                "end": "2024-06-03T11:30:00Z",
+                "reservables": [self.p22.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        self.r2.refresh_from_db()
+        self.assertEqual(self.r2.reason, "Moved into r1's slot")
+
 
 class HTMLFormPermissionTests(ReservationTestDataMixin, TestCase):
     """Test permissions for HTML form-based views (ReservationCreateView and ReservationUpdateView)."""
@@ -169,6 +254,43 @@ class HTMLFormPermissionTests(ReservationTestDataMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         # Check that a new reservation was created
         self.assertTrue(Reservation.objects.filter(reason="Testing form creation", owners=self.profesor).exists())
+
+    def test_profesor_create_double_reservation_denied(self):
+        """Professor without double_reserve permission should not be able to create overlapping reservation."""
+        self.client.force_login(self.profesor)
+        response = self.client.post(
+            reverse("reservation_create") + f"?reservableset_slug={self.fri.slug}",
+            {
+                "start": "2024-06-03T10:30:00Z",
+                "end": "2024-06-03T11:30:00Z",
+                "reason": "Testing double booking denial",
+                "owners": [self.profesor.id],
+                "reservables": [self.p22.id],
+            },
+        )
+        # Should fail and return the form with errors
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context["form"]
+        self.assertTrue(any("No double booking" in str(error) for error in form.non_field_errors()))
+
+    def test_profesor2_create_double_reservation_allowed(self):
+        """Professor with double_reserve permission should be able to create overlapping reservation."""
+        self.client.force_login(self.profesor2)
+        response = self.client.post(
+            reverse("reservation_create") + f"?reservableset_slug={self.fri.slug}",
+            {
+                "start": "2024-06-03T10:30:00Z",
+                "end": "2024-06-03T11:30:00Z",
+                "reason": "Testing double booking allowed",
+                "owners": [self.profesor2.id],
+                "reservables": [self.p22.id],
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND, getattr(response, "context", None) and response.context["form"].errors)
+        # Check that the overlapping reservation was created
+        self.assertTrue(
+            Reservation.objects.filter(reason="Testing double booking allowed", owners=self.profesor2).exists()
+        )
 
     def test_profesor_create_invalid_time_range(self):
         """Should fail when end time is before start time."""
@@ -253,6 +375,13 @@ class HTMLFormPermissionTests(ReservationTestDataMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, 'id="reservationForm"')
 
+    def test_profesor_update_other_reservation_denied(self):
+        """Professor should not be able to access update form for other's reservation."""
+        self.client.force_login(self.profesor)
+        response = self.client.get(reverse("reservation_update", kwargs={"pk": self.r2.pk}))
+        # Should be denied because r2 is owned by profesor2
+        self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_302_FOUND])
+
     def test_profesor_update_own_reservation(self):
         """Professor should be able to update own reservation."""
         self.client.force_login(self.profesor)
@@ -266,14 +395,48 @@ class HTMLFormPermissionTests(ReservationTestDataMixin, TestCase):
                 "reservables": [self.p22.id],
             },
         )
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_302_FOUND,
-            getattr(response, "context", None) and response.context["form"].errors,
-        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND, getattr(response, "context", None) and response.context["form"].errors)
         # Check that the reservation was updated
         self.r1.refresh_from_db()
         self.assertEqual(self.r1.reason, "Updated reason")
+
+    def test_profesor_update_create_double_reservation_denied(self):
+        """Professor without double_reserve should not be able to update to overlapping time."""
+        self.client.force_login(self.profesor)
+        response = self.client.post(
+            reverse("reservation_update", kwargs={"pk": self.r1.pk}),
+            {
+                "start": "2024-06-04T10:30:00Z",
+                "end": "2024-06-04T11:30:00Z",
+                "reason": "Trying to create overlap",
+                "owners": [self.profesor.id],
+                "reservables": [self.pa.id],  # r2 uses pa, so this would overlap
+            },
+        )
+        # Should fail and return the form with errors
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context["form"]
+        self.assertTrue(any("No double booking" in str(error) for error in form.non_field_errors()))
+        self.r1.refresh_from_db()
+        self.assertEqual(self.r1.reason, "Reservation 1")
+
+    def test_profesor2_update_create_double_reservation_allowed(self):
+        """Professor with double_reserve permission should be able to update to overlapping time."""
+        self.client.force_login(self.profesor2)
+        response = self.client.post(
+            reverse("reservation_update", kwargs={"pk": self.r2.pk}),
+            {
+                "start": "2024-06-03T10:30:00Z",
+                "end": "2024-06-03T11:30:00Z",
+                "reason": "Double booking allowed",
+                "owners": [self.profesor2.id],
+                "reservables": [self.p22.id],  # r1 uses p22, so this would overlap
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND, getattr(response, "context", None) and response.context["form"].errors)
+        # Check that the reservation was updated
+        self.r2.refresh_from_db()
+        self.assertEqual(self.r2.reason, "Double booking allowed")
 
     def test_profesor_update_invalid_time_range(self):
         """Should fail when end time is before start time."""

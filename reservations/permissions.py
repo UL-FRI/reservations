@@ -118,8 +118,8 @@ class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
         # We have to check the reservables that are contained in the intersection of
         # the overlapping reservations and given reservables.
         reservables_to_check = (
-            Reservable.objects.filter(reservation__in=overlapping_reservations)
-            .filter(pk__in=reservables.values("pk"))
+            Reservable.objects.filter(reservations__in=overlapping_reservations)
+            .filter(pk__in=[r.pk for r in reservables.all()])
             .distinct()
         )
 
