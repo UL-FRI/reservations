@@ -202,7 +202,16 @@ function loadData() {
     });
 }
 
+function updateDateInURL(dateStr) {
+    const url = new URL(window.location);
+    url.searchParams.set('date', dateStr);
+    history.replaceState({}, '', url);
+}
+
 function setCalendarDate(centerDate) {
+    // $calendarDateInput.value is already kept in ISO (YYYY-MM-DD) format.
+    updateDateInURL($calendarDateInput.value);
+
     [start, end] = getRange(centerDate);
 
     // Start loading data
