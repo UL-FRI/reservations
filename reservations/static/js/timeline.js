@@ -305,6 +305,6 @@ async function fetchReservables() {
 }
 
 async function fetchEventsInRange(startDate, endDate) {
-    const res = await fetch(`/api/reservations/?reservables__reservableset_set__slug=${window.RESERVABLE_SET_SLUG}&reservables__type=${window.RESERVABLE_TYPE_SLUG}&start__gte=${startDate}&end__lte=${endDate}`)
+    const res = await fetch(`/api/reservations/?reservables__reservableset_set__slug=${window.RESERVABLE_SET_SLUG}&reservables__type=${window.RESERVABLE_TYPE_SLUG}&start__lte=${endDate}&end__gte=${startDate}`)
     return await res.json()
 }
