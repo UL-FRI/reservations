@@ -22,9 +22,9 @@ if (window.screen.width < 900) {
 }
 
 // Initialize the timeline
-function initTimeline() {
-    DISPLAY_DAYS = parseInt(localStorage.getItem('displayDays'), 10) || DISPLAY_DAYS;    
-    const [start, end] = getRange()
+function initTimeline(centerDate) {
+    DISPLAY_DAYS = parseInt(localStorage.getItem('displayDays'), 10) || DISPLAY_DAYS;
+    const [start, end] = getRange(centerDate)
 
     const options = {
         orientation: 'top',
@@ -252,7 +252,10 @@ function getDateFromURL() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
-    initTimeline();
+    const initialDate = getDateFromURL() || new Date();
+    $calendarDateInput.value = initialDate.toISOString().split('T')[0];
+
+    initTimeline(initialDate);
 
     // Handle previous date button click
     $prevDateBtn.addEventListener('click', function () {
@@ -285,9 +288,6 @@ document.addEventListener('DOMContentLoaded', function () {
         setDays(days)
     }));
 
-    const initialDate = getDateFromURL();
-    $calendarDateInput.value = (initialDate || new Date()).toISOString().split('T')[0];
-    
     setDays(DISPLAY_DAYS)
 });
 
