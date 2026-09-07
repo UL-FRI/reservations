@@ -231,3 +231,8 @@ def login_redirect(request):
         return RedirectView.as_view(url=reverse('social:begin', kwargs={'backend': 'oidc'}))(request)
     # Otherwise, use the admin login page
     return RedirectView.as_view(url=reverse('login'))(request)
+
+class LegacyBookmarkRedirectView(RedirectView):
+	@override
+	def get_redirect_url(self, *args, **kwargs) -> str | None:
+		return reverse('timeline', kwargs=kwargs)

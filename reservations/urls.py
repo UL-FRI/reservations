@@ -2,7 +2,7 @@ from django.urls import include, path, re_path
 from django.views.generic.base import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from reservations.autocomplete import ReservableAutocomplete, UserAutocomplete
-from reservations.views import (HomeView, NResourcesViewSet,
+from reservations.views import (HomeView, LegacyBookmarkRedirectView, NResourcesViewSet,
                                 OldReservableViewSet, OldReservationViewSet,
                                 ReservableSetViewSet, ReservableViewSet,
                                 ReservationCreateView, ReservationDeleteView, ReservationDetailView, ReservationUpdateView,
@@ -28,6 +28,7 @@ urlpatterns = [
     # Mostly-static pages
     path("", HomeView.as_view()),
     path("timeline/<str:reservable_set_slug>/<str:reservable_type_slug>", TimelineView.as_view(), name="timeline"),
+    path("sets/<str:reservable_set_slug>/types/<str:reservable_type_slug>/time_view", LegacyBookmarkRedirectView.as_view()),
 
     path("user/<str:pk>/", UserView.as_view(), name="user_detail"),
 
