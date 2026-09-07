@@ -25,7 +25,7 @@ from reservations.filters import (NResourcesFilter, ReservableFilter,
                                   ReservableSetFilter, ReservationFilter,
                                   ResourceFilter)
 from reservations.forms import ReservationForm
-from reservations.models import (NResources, Reservable, ReservableSet,
+from reservations.models import (NResources, Reservable, ReservableSet, ReservableType,
                                  Reservation, Resource)
 from reservations.permissions import ReservationPermission
 from reservations.serializers import (ReservableNResourcesSerializer,
@@ -122,7 +122,7 @@ class HomeView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         for rs in context['object_list']:
-            rs.types = set(rs.reservables.values_list('type__slug', flat=True))
+            rs.types = ReservableType.objects.filter(reservables__reservableset_set=rs).distinct()
         return context
 
 class GiveFormRequestMixin:

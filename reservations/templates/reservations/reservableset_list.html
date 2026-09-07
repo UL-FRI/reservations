@@ -17,7 +17,9 @@
                 <h2 class="card-title">{{ reservableset.name }}</h2>
                 <div>
                     {% for reservable_type in reservableset.types %}
-                        <a href="timeline/{{reservableset.slug}}/{{reservable_type}}" class="badge fs-5 bg-secondary mb-1 text-decoration-none">{{ reservable_type }}</a>
+                    	{% if not reservable_type.hidden %}
+                        	<a href="timeline/{{reservableset.slug}}/{{reservable_type.id}}" class="badge fs-5 bg-secondary mb-1 text-decoration-none">{{ reservable_type.display_name }}</a>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
