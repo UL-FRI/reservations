@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.test import Client, TestCase
 from django.urls import reverse
 from guardian.shortcuts import assign_perm
-from reservations.models import Reservable, ReservableSet, Reservation
+from reservations.models import Reservable, ReservableSet, ReservableType, Reservation
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -45,11 +45,12 @@ class ReservationTestDataMixin:
         # Create reservablesets and some classrooms
         cls.fri = ReservableSet.objects.create(name="Fri rezervacije", slug="rezervacije_fri")
         cls.fkkt = ReservableSet.objects.create(name="FKKT rezervacije", slug="rezervacije_fkkt")
-        cls.p22 = Reservable.objects.create(name="P22", slug="P22", type="classroom")
+        cls.classroom_type = ReservableType.objects.create(slug="classroom", display_name="Classroom")
+        cls.p22 = Reservable.objects.create(name="P22", slug="P22", type=cls.classroom_type)
         cls.p22.reservableset_set.add(cls.fri)
-        cls.pb = Reservable.objects.create(name="PB", slug="PB", type="classroom")
+        cls.pb = Reservable.objects.create(name="PB", slug="PB", type=cls.classroom_type)
         cls.pb.reservableset_set.add(cls.fkkt)
-        cls.pa = Reservable.objects.create(name="PA", slug="PA", type="classroom")
+        cls.pa = Reservable.objects.create(name="PA", slug="PA", type=cls.classroom_type)
         cls.pa.reservableset_set.add(cls.fri, cls.fkkt)
 
         # Set up permissions (both profs can reserve, only prof2 can double-reserve)

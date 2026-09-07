@@ -104,13 +104,14 @@ class BaseFilter(CheckQueryParamsMixin, filters.FilterSet):
 class ReservableFilter(BaseFilter):
     """Reservable filter."""
 
+    type = filters.CharFilter(field_name="type__slug")
+
     class Meta:
         """Set the model and the filterable fields."""
 
         model = Reservable
         fields = {
             "reservableset_set__slug": SLUG_LOOKUPS,
-            "type": TEXT_LOOKUPS,
             "nresources__n": NUMBER_LOOKUPS,
             "nresources__resource__slug": SLUG_LOOKUPS,
             **base_fields,
@@ -119,6 +120,8 @@ class ReservableFilter(BaseFilter):
 
 class ReservationFilter(BaseFilter):
     """Reservation filter."""
+
+    reservables__type = filters.CharFilter(field_name="reservables__type__slug")
 
     class Meta:
         """Set the model and the filterable fields."""
@@ -134,7 +137,6 @@ class ReservationFilter(BaseFilter):
             "reservables": NUMBER_LOOKUPS[:],
             "reservables__name": TEXT_LOOKUPS,
             "reservables__slug": SLUG_LOOKUPS,
-            "reservables__type": SLUG_LOOKUPS,
             "reservables__reservableset_set__slug": SLUG_LOOKUPS,
             "id": NUMBER_LOOKUPS[:],
         }

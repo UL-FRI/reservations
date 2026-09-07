@@ -65,7 +65,7 @@ class ReservationForm(FormWithRequestMixin, forms.ModelForm):
             plugin_remove_button=PluginRemoveButton(),
             plugin_dropdown_header=PluginDropdownHeader(
                 extra_columns={
-                    "type": _("Type")
+                    "type__display_name": _("Type")
                 }
             ),
             use_htmx=True,

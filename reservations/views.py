@@ -52,7 +52,7 @@ class ReservableViewSet(viewsets.ModelViewSet):
 class OldReservableViewSet(ReservableViewSet):
     """For compatibility with the old version of reservations"""
     def get_queryset(self):
-        return super().get_queryset().filter(reservableset_set__slug=self.kwargs['reservable_set_slug'], type=self.kwargs['reservable_type'])
+        return super().get_queryset().filter(reservableset_set__slug=self.kwargs['reservable_set_slug'], type__slug=self.kwargs['reservable_type'])
 
 class ResourceViewSet(viewsets.ModelViewSet):
     """The resource viewset."""
@@ -122,7 +122,7 @@ class HomeView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         for rs in context['object_list']:
-            rs.types = set(rs.reservables.values_list('type', flat=True))
+            rs.types = set(rs.reservables.values_list('type__slug', flat=True))
         return context
 
 class GiveFormRequestMixin:

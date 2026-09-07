@@ -8,14 +8,14 @@ from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from import_export.admin import ImportExportMixin
 
 from reservations.merge import merge_reservables
-from reservations.models import NRequirements, NResources, Reservable, ReservableSet, Reservation, Resource, UserProfile
+from reservations.models import NRequirements, NResources, Reservable, ReservableSet, ReservableType, Reservation, Resource, UserProfile
 from reservations_connect.models import ForeignReservable
 
 class ReservationAdmin(GuardedModelAdmin):
     search_fields = ("reason",)
     list_display = ("reason", "start", "end", "_reservables", "created_at", "updated_at")
     list_filter = ("reservables__type", "reservables__reservableset_set", "start", ("reservables", RelatedDropdownFilter), ("importbatch", RelatedDropdownFilter))
-    raw_id_fields = ("reservables", "owners")
+    autocomplete_fields = ("reservables", "owners")
     readonly_fields = ("created_at", "updated_at")
 
     def _reservables(self, obj):
@@ -80,8 +80,12 @@ class ReservableAdmin(SortableAdminMixin, ImportExportMixin, GuardedModelAdmin):
         return inlines
 
 
-class ReservableSetAdmin(GuardedModelAdmin):
+class ReservableSetAdmin(SortableAdminMixin, GuardedModelAdmin):
     filter_horizontal = ("reservables",)
+
+
+class ReservableTypeAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = ("order", "display_name", "slug", "hidden")
 
 
 admin.site.register(Reservation, ReservationAdmin)
@@ -89,6 +93,7 @@ admin.site.register(Reservable, ReservableAdmin)
 # admin.site.register(Resource)
 # admin.site.register(NResources)
 admin.site.register(ReservableSet, ReservableSetAdmin)
+admin.site.register(ReservableType, ReservableTypeAdmin)
 # admin.site.register(NRequirements)
 admin.site.register(Permission)
 # admin.site.register(UserProfile)

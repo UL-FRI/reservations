@@ -2,12 +2,13 @@ from django.test import TestCase
 from datetime import datetime
 from django.utils import timezone
 
-from reservations.models import Reservable, Reservation
+from reservations.models import Reservable, ReservableType, Reservation
 
 
 class OverlapTests(TestCase):
     def setUp(self):
-        self.reservable = Reservable.objects.create(slug='room1', type='room', name='Room 1')
+        room_type = ReservableType.objects.create(slug='room', display_name='Room')
+        self.reservable = Reservable.objects.create(slug='room1', type=room_type, name='Room 1')
 
     def test_adjacent_intervals_not_overlapping(self):
         start1 = timezone.make_aware(datetime(2023, 1, 1, 13, 0))
@@ -51,5 +52,3 @@ class OverlapTests(TestCase):
         r1.reservables.add(self.reservable)
         qs = Reservation.objects.overlapping(start2, end2, Reservable.objects.filter(pk=self.reservable.pk))
         self.assertTrue(qs.filter(pk=r1.pk).exists())
-    def setUp(self):
-        self.reservable = Reservable.objects.create(slug='room1', type='room', name='Room 1')

@@ -39,13 +39,18 @@ class ReservableSet(models.Model):
     #: The reservables in this set.
     reservables = models.ManyToManyField("Reservable", related_name="reservableset_set")
 
+    order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta:
+        ordering = ['order']
+
     def __str__(self) -> str:
         """Return the human readable representation."""
         return self.name
 
     def reservable_types(self) -> Iterable[str]:
         """Return the types of reservables in this set."""
-        return set(self.reservables.values_list("type", flat=True))
+        return set(self.reservables.values_list("type__slug", flat=True))
 
 
 class Resource(models.Model):
@@ -86,6 +91,30 @@ class NResources(models.Model):
         verbose_name_plural = _("countable resources")
 
 
+class ReservableType(models.Model):
+    """The type of a reservable. It is used to group reservables."""
+
+    #: The slug of the reservable type.
+    slug = models.SlugField(unique=True)
+
+    #: The human readable name of the reservable type.
+    display_name = models.CharField(max_length=255)
+
+    #: Whether the type is hidden on the frontend.
+    hidden = models.BooleanField(default=False)
+
+    order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = _("reservable type")
+        verbose_name_plural = _("reservable types")
+
+    def __str__(self) -> str:
+        """Return the human readable representation."""
+        return self.display_name
+
+
 class Reservable(models.Model):
     """The reservable object.
 
@@ -96,7 +125,7 @@ class Reservable(models.Model):
     slug = models.SlugField(unique=True)
 
     #: The reservable type. It is used to group reservables.
-    type = models.CharField(max_length=255)
+    type = models.ForeignKey("ReservableType", on_delete=models.PROTECT, related_name="reservables")
 
     #: The reservable name.
     name = models.CharField(max_length=255)

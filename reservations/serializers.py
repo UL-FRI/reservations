@@ -2,7 +2,7 @@
 
 from django.contrib.auth.models import User
 from reservations.models import (NResources, Reservable, ReservableSet,
-                                 Reservation, Resource)
+                                 ReservableType, Reservation, Resource)
 from rest_framework import serializers
 
 
@@ -27,6 +27,7 @@ class ReservableNResourcesSerializer(serializers.ModelSerializer):
 
 class ReservableSerializer(serializers.ModelSerializer):
     nresources_set = ReservableNResourcesSerializer(many=True, read_only=True)
+    type = serializers.SlugRelatedField(slug_field="slug", queryset=ReservableType.objects.all())
 
     class Meta:
         model = Reservable
