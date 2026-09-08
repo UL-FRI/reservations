@@ -18,7 +18,7 @@
                 <div>
                     {% for reservable_type in reservableset.types %}
                     	{% if not reservable_type.hidden %}
-                        	<a href="timeline/{{reservableset.slug}}/{{reservable_type.id}}" class="badge fs-5 bg-secondary mb-1 text-decoration-none">{{ reservable_type.display_name }}</a>
+                        	<a href="timeline/{{reservableset.slug}}/{{reservable_type.slug}}" class="badge fs-5 bg-secondary mb-1 text-decoration-none">{{ reservable_type.display_name }}</a>
                         {% endif %}
                     {% endfor %}
                 </div>
