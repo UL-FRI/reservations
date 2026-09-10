@@ -16,6 +16,12 @@ let DISPLAY_DAYS = 5;
 let BUTTON_SKIP = 2;
 let DONE_LOADING = false;
 
+// Tracks pointer down position/time, to tell a click apart from a drag
+let pointerDownPos = null;
+let pointerDownTime = 0;
+const CLICK_MOVE_THRESHOLD = 10; // px
+const CLICK_TIME_THRESHOLD = 500; // ms
+
 // Default to 1 day on small screens
 if (window.screen.width < 900) {
     DISPLAY_DAYS = 1
@@ -77,9 +83,13 @@ function initTimeline(centerDate) {
 
     // Add event listeners
     timeline.on('click', function (properties) {
+        if (wasDrag(properties)) return;
+
         if (properties.item !== null) {
             const realItem = items.get(properties.item);
             eventClicked(realItem.reservationId);
+        } else if (IS_LOGGED_IN && properties.what === 'background' && properties.group != null) {
+            openCreateFormForSlot(properties.time, properties.group);
         }
     });
 
@@ -162,6 +172,32 @@ function eventCreated(props, callback) {
     openForm(`/reservations/create?start=${props.start.toISOString()}&end=${props.end.toISOString()}&reservables=${props.group}&reservableset_slug=${window.RESERVABLE_SET_SLUG}`)
 }
 
+// Opens the creation form for a 1-hour slot starting at slotTime, rounded down to the hour
+function openCreateFormForSlot(slotTime, group) {
+    const start = new Date(slotTime);
+    start.setMinutes(0, 0, 0);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    openForm(`/reservations/create?start=${start.toISOString()}&end=${end.toISOString()}&reservables=${group}&reservableset_slug=${window.RESERVABLE_SET_SLUG}`)
+}
+
+function recordPointerDown(e) {
+    const point = e.touches ? e.touches[0] : e;
+    pointerDownPos = { x: point.pageX, y: point.pageY };
+    pointerDownTime = Date.now();
+}
+
+function wasDrag(properties) {
+    if (!pointerDownPos) return true;
+    const dx = properties.pageX - pointerDownPos.x;
+    const dy = properties.pageY - pointerDownPos.y;
+    const elapsed = Date.now() - pointerDownTime;
+    return Math.hypot(dx, dy) > CLICK_MOVE_THRESHOLD || elapsed > CLICK_TIME_THRESHOLD;
+}
+
+// Bind to all the down events
+$container.addEventListener('mousedown', recordPointerDown, { capture: true });
+$container.addEventListener('pointerdown', recordPointerDown, { capture: true });
+$container.addEventListener('touchstart', recordPointerDown, { capture: true, passive: true });
 
 function getRange(centerDate) {
     // Default to today
