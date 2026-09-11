@@ -1,0 +1,12 @@
+{% extends "reservations/auto_base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Permission denied" %}{% endblock %}
+{% block contained %}
+<div class="alert alert-danger">
+    {% trans "You do not have permission to perform this action." %}
+    {% if exception %}<div class="small mt-2">{{ exception }}</div>{% endif %}
+</div>
+{% if not user.is_authenticated %}
+<a href="{% url 'autologin' %}" class="btn btn-primary">{% trans "Login" %}</a>
+{% endif %}
+{% endblock %}

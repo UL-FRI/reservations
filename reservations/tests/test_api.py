@@ -399,17 +399,17 @@ class HTMLFormPermissionTests(ReservationTestDataMixin, TestCase):
     # RESERVATION UPDATE VIEW
     #
 
-    def test_unauthenticated_update_redirects(self):
-        """Unauthenticated user should be redirected to login."""
+    def test_unauthenticated_update_denied(self):
+        """Unauthenticated user should see a permission denied page, not a login redirect."""
         response = self.client.get(reverse("reservation_update", kwargs={"pk": self.r1.pk}))
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_student_update_reservation_denied(self):
         """Student without permissions should not be able to access update form."""
         self.client.force_login(self.student)
         response = self.client.get(reverse("reservation_update", kwargs={"pk": self.r1.pk}))
         # Student has no change_reservation permission, so should get 403
-        self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_302_FOUND])
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_profesor_update_own_reservation_get(self):
         """Professor should be able to access update form for own reservation."""
@@ -423,7 +423,7 @@ class HTMLFormPermissionTests(ReservationTestDataMixin, TestCase):
         self.client.force_login(self.profesor)
         response = self.client.get(reverse("reservation_update", kwargs={"pk": self.r2.pk}))
         # Should be denied because r2 is owned by profesor2
-        self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_302_FOUND])
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_profesor_update_own_reservation(self):
         """Professor should be able to update own reservation."""

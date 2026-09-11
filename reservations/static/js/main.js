@@ -76,5 +76,13 @@
           showActiveTheme(theme, true)
         })
       })
+
+    // htmx only swaps in 2xx responses by default. Error pages (e.g. the 403 permission denied page) still carry a normal HTML body we want shown to the user, so treat them as swappable content instead of silently dropping them.
+    document.body.addEventListener('htmx:beforeSwap', (evt) => {
+      if (evt.detail.xhr.status === 403 || evt.detail.xhr.status === 404) {
+        evt.detail.shouldSwap = true
+        evt.detail.isError = false
+      }
+    })
   })
 })()

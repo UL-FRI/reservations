@@ -182,10 +182,15 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
             initial["reservables"] = self.request.GET["reservables"]
         return initial
 
-class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, UpdateView):
+class PermissionDeniedMixin(PermissionRequiredMixin):
+    """Always show a permission denied error instead of redirecting to the login page."""
+
+    raise_exception = True
+
+class ReservationUpdateView(GiveFormRequestMixin, PermissionDeniedMixin, UpdateView):
     model = Reservation
     form_class = ReservationForm
-    
+
     def get_required_permissions(self, request: Optional[HttpRequest] = None) -> list[str]:
         return ['reservations.change_reservation']
 
@@ -197,7 +202,7 @@ class ReservationUpdateView(GiveFormRequestMixin, PermissionRequiredMixin, Updat
         messages.success(self.request, _('Reservation updated successfully.'))
         return super().form_valid(form)
 
-class ReservationDeleteView(PermissionRequiredMixin, DeleteView):
+class ReservationDeleteView(PermissionDeniedMixin, DeleteView):
     model = Reservation
     permission_required = 'reservations.delete_reservation'
     success_url = "/"  # This is ignored
@@ -207,7 +212,7 @@ class ReservationDeleteView(PermissionRequiredMixin, DeleteView):
         super().form_valid(form)
         return HttpResponse(status=204)
 
-class SelfOrSuperuserRequiredMixin(PermissionRequiredMixin):
+class SelfOrSuperuserRequiredMixin(PermissionDeniedMixin):
     """Restrict access to the URL's own `pk` (or 'me') unless the user is a superuser.
 
     Used to let a user view their own resources while still allowing admins to view anyone's.
@@ -215,7 +220,7 @@ class SelfOrSuperuserRequiredMixin(PermissionRequiredMixin):
 
     @override
     def check_permissions(self, request: HttpRequest):
-        if self.kwargs.get('pk') == 'me' or self.request.user.is_superuser:
+        if self.request.user.is_authenticated and (self.kwargs.get('pk') == 'me' or self.request.user.is_superuser):
             return None
         raise PermissionDenied()
 
