@@ -21,7 +21,6 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from django_tomselect.app_settings import TomSelectConfig
 from guardian.mixins import PermissionRequiredMixin
-from guardian.shortcuts import assign_perm
 from reservations.overlaps import annotate_overlaps
 from reservations.filters import (NResourcesFilter, ReservableFilter,
                                   ReservableSetFilter, ReservationFilter,
@@ -156,11 +155,8 @@ class ReservationCreateView(GiveFormRequestMixin, CreateView):
     
     def form_valid(self, form):
         messages.success(self.request, _('Reservation created successfully.'))
-        resp = super().form_valid(form)
-        # User who created the reservation should have permission to edit and delete it
-        assign_perm('reservations.change_reservation', self.request.user, self.object)
-        assign_perm('reservations.delete_reservation', self.request.user, self.object)
-        return resp
+        # Owner permissions (change/delete) are synced automatically from `owners` by the m2m_changed signal in reservations.signals.
+        return super().form_valid(form)
 
     @override
     def get_success_url(self):

@@ -9,12 +9,45 @@ from django.contrib.auth.models import Permission, User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from guardian.core import ObjectPermissionChecker
+from guardian.shortcuts import assign_perm, get_users_with_perms, remove_perm
 from reservations.models import Reservable, Reservation
 from reservations.serializers import ReservationSerializer
 from reservations.util import ListWithAll
 from rest_framework import exceptions, permissions
 from rest_framework.request import Request
 from rest_framework.views import View
+
+#: Object-level permissions an owner should hold on their reservation.
+OWNER_PERMS = ("change_reservation", "delete_reservation")
+
+
+def sync_reservation_owner_permissions(reservation: Reservation, dry_run: bool = False) -> list[str]:
+    """Make guardian object permissions on a reservation match its current owners.
+
+    Every owner is granted :data:`OWNER_PERMS`; anyone holding those permissions who is no longer an owner has them revoked.
+
+    :param dry_run: When true, compute but don't apply the changes.
+    :return: Human readable descriptions of the permission changes (made, or that would be made if ``dry_run``).
+    """
+    owner_ids = set(reservation.owners.values_list("pk", flat=True))
+    changes = []
+    for perm in OWNER_PERMS:
+        codename = f"reservations.{perm}"
+        holder_ids = {
+            user.pk
+            for user in get_users_with_perms(
+                reservation, only_with_perms_in=[perm], with_group_users=False
+            )
+        }
+        for user in User.objects.filter(pk__in=owner_ids - holder_ids):
+            changes.append(f"grant {perm} to {user} on {reservation}")
+            if not dry_run:
+                assign_perm(codename, user, reservation)
+        for user in User.objects.filter(pk__in=holder_ids - owner_ids):
+            changes.append(f"revoke {perm} from {user} on {reservation}")
+            if not dry_run:
+                remove_perm(codename, user, reservation)
+    return changes
 
 
 class ReservationPermission(permissions.DjangoModelPermissionsOrAnonReadOnly):
