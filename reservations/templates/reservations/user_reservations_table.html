@@ -31,7 +31,7 @@
 </table>
 
 {% if is_paginated %}
-<nav aria-label="{% trans "Reservation pagination" %}">
+<nav>
     <ul class="pagination justify-content-center">
         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
             {% if page_obj.has_previous %}
