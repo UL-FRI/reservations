@@ -36,12 +36,21 @@ hx-target="closest .htmxTarget">
                 <div class="--collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
-                        <li class="nav-item text-light">
-                            <!--<span class="color-text me-1">{{ request.user.username }}</span>-->
-                            <form action="{% url 'logout' %}" method="post" class="d-inline">
-                              {% csrf_token %}
-                              <button type="submit" class="btn btn-link nav-link">{% trans "Log out" %}</button>
-                            </form>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" href="{% url 'user_detail' 'me' %}">{% trans "Profile" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'user_reservations' 'me' %}">{% trans "My reservations" %}</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post">
+                                      {% csrf_token %}
+                                      <button type="submit" class="dropdown-item">{% trans "Log out" %}</button>
+                                    </form>
+                                </li>
+                            </ul>
                         </li>
                         {% else %}
                             <li class="nav-item">

@@ -1,0 +1,11 @@
+{% extends "reservations/base.html" %}
+{% load i18n %}
+
+{% block title %}{% if target_user == request.user %}{% trans "My reservations" %}{% else %}{% blocktrans with username=target_user.username %}Reservations for {{ username }}{% endblocktrans %}{% endif %}{% endblock %}
+
+{% block contained %}
+<h2>{% if target_user == request.user %}{% trans "My reservations" %}{% else %}{% blocktrans with username=target_user.username %}Reservations for {{ username }}{% endblocktrans %}{% endif %}</h2>
+<div id="my-reservations-table">
+    {% include "reservations/user_reservations_table.html" %}
+</div>
+{% endblock %}

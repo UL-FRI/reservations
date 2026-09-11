@@ -7,7 +7,7 @@ from reservations.views import (HomeView, LegacyBookmarkRedirectView, NResources
                                 ReservableSetViewSet, ReservableViewSet,
                                 ReservationCreateView, ReservationDeleteView, ReservationDetailView, ReservationUpdateView,
                                 ReservationViewSet, ResourceViewSet,
-                                TimelineView, UserView, UserViewSet, login_redirect)
+                                TimelineView, UserReservationsView, UserView, UserViewSet, login_redirect)
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -31,6 +31,7 @@ urlpatterns = [
     path("sets/<str:reservable_set_slug>/types/<str:reservable_type_slug>/time_view", LegacyBookmarkRedirectView.as_view()),
 
     path("user/<str:pk>/", UserView.as_view(), name="user_detail"),
+    path("user/<str:pk>/reservations", UserReservationsView.as_view(), name="user_reservations"),
 
     # Reservation management form
     path("reservations/create", ReservationCreateView.as_view(), name="reservation_create"),

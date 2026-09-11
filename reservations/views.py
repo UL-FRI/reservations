@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.http.request import HttpRequest
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView
@@ -21,6 +22,7 @@ from django.views.generic.list import ListView
 from django_tomselect.app_settings import TomSelectConfig
 from guardian.mixins import PermissionRequiredMixin
 from guardian.shortcuts import assign_perm
+from reservations.overlaps import annotate_overlaps
 from reservations.filters import (NResourcesFilter, ReservableFilter,
                                   ReservableSetFilter, ReservationFilter,
                                   ResourceFilter)
@@ -205,14 +207,11 @@ class ReservationDeleteView(PermissionRequiredMixin, DeleteView):
         super().form_valid(form)
         return HttpResponse(status=204)
 
-class UserView(PermissionRequiredMixin, DetailView):
-    model = User
-    
-    @override
-    def get_object(self, queryset=None):
-        if self.kwargs.get('pk') == 'me':
-            return self.request.user
-        return super().get_object(queryset)
+class SelfOrSuperuserRequiredMixin(PermissionRequiredMixin):
+    """Restrict access to the URL's own `pk` (or 'me') unless the user is a superuser.
+
+    Used to let a user view their own resources while still allowing admins to view anyone's.
+    """
 
     @override
     def check_permissions(self, request: HttpRequest):
@@ -220,9 +219,50 @@ class UserView(PermissionRequiredMixin, DetailView):
             return None
         raise PermissionDenied()
 
+
+class UserView(SelfOrSuperuserRequiredMixin, DetailView):
+    model = User
+
+    @override
+    def get_object(self, queryset=None):
+        if self.kwargs.get('pk') == 'me':
+            return self.request.user
+        return super().get_object(queryset)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
+        return context
+
+
+class UserReservationsView(SelfOrSuperuserRequiredMixin, ListView):
+    model = Reservation
+    template_name = "reservations/user_reservations.html"
+    context_object_name = "reservations"
+    paginate_by = 20
+
+    def get_target_user(self) -> User:
+        if self.kwargs.get('pk') == 'me':
+            return self.request.user
+        return get_object_or_404(User, pk=self.kwargs['pk'])
+
+    def get_queryset(self):
+        return (
+            Reservation.objects.owned_by_user(self.get_target_user())
+            .prefetch_related("reservables")
+            .order_by("-start")
+        )
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["reservations/user_reservations_table.html"]
+        return [self.template_name]
+
+    @override
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["reservations"] = annotate_overlaps(context["object_list"])
+        context["target_user"] = self.get_target_user()
         return context
 
 def login_redirect(request):

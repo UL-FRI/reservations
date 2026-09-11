@@ -1,0 +1,57 @@
+{% load i18n %}
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>{% trans "Reason" %}</th>
+            <th>{% trans "From" %}</th>
+            <th>{% trans "To" %}</th>
+            <th>{% trans "Reservables" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reservation in reservations %}
+        <tr class="{% if reservation.overlaps_with %}table-danger{% endif %}">
+            <td><a href="{% url 'reservation_detail' reservation.pk %}">{{ reservation.reason }}</a></td>
+            <td>{{ reservation.start }}</td>
+            <td>{{ reservation.end }}</td>
+            <td>{% for reservable in reservation.reservables.all %}{{ reservable.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+        </tr>
+        {% if reservation.overlaps_with %}
+        <tr class="table-danger">
+            <td colspan="4" class="small">
+                {% trans "Overlaps with:" %}
+                {% for other in reservation.overlaps_with %}<a href="{% url 'reservation_detail' other.pk %}">{{ other.reason }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+            </td>
+        </tr>
+        {% endif %}
+        {% empty %}
+        <tr><td colspan="4">{% trans "You have no reservations." %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_paginated %}
+<nav aria-label="{% trans "Reservation pagination" %}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+            {% if page_obj.has_previous %}
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#my-reservations-table" hx-push-url="true">{% trans "Previous" %}</a>
+            {% else %}
+            <span class="page-link">{% trans "Previous" %}</span>
+            {% endif %}
+        </li>
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}" hx-get="?page={{ num }}" hx-target="#my-reservations-table" hx-push-url="true">{{ num }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+            {% if page_obj.has_next %}
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" hx-get="?page={{ page_obj.next_page_number }}" hx-target="#my-reservations-table" hx-push-url="true">{% trans "Next" %}</a>
+            {% else %}
+            <span class="page-link">{% trans "Next" %}</span>
+            {% endif %}
+        </li>
+    </ul>
+</nav>
+{% endif %}
