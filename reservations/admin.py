@@ -27,7 +27,7 @@ class ReservationAdmin(GuardedModelAdmin):
 
 class ReservableAdmin(SortableAdminMixin, ImportExportMixin, GuardedModelAdmin):
     search_fields = ("name", "slug")
-    list_display = ("order", "name", "type", "_reservablesets")
+    list_display = ("order", "name", "type", "slug", "_reservablesets")
     list_filter = ("type", "reservableset_set")
     actions = ["merge_reservables"]
 
